@@ -1,17 +1,18 @@
-import { serve } from "https://deno.land/std@0.184.0/http/server.ts";
-import { getElm } from "./elm.ts"
+// import { serve } from "https://deno.land/std@0.184.0/http/server.ts";
+// import { getElm } from "./elm.ts"
 
-const Elm = getElm();
+// const Elm = getElm();
 
-Elm.Main.init();
+// Elm.Main.init();
 
-console.log()
+// console.log()
 
+// // function handler(_req: Request): Response {
+// //   return new Response("Hello, World!");
+// // }
 
-// function handler(_req: Request): Response {
-//   return new Response("Hello, World!");
-// }
+// // console.log("Listening on http://localhost:8000");
 
-// console.log("Listening on http://localhost:8000");
+// // serve(handler);
 
-// serve(handler);
+import "../scripts/elm.ts";
