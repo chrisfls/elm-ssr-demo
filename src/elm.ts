@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 
-import "web/index.js";
+import "../web/index.js";
 
 export interface PortWithSend<Message = unknown> {
   send(value: Message): void;
