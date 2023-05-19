@@ -1,9 +1,14 @@
 {
   "imports": {
-    "std/": "https://deno.land/std@0.188.0/"
+    "std/": "https://deno.land/std@0.188.0/",
+    "web/": "./web/"
   },
   "tasks": {
-    "dev": "deno run -A --watch src/server.ts",
-    "build:dev": "./node_modules/.bin/elm make client/src/Main.elm --output=web/index.js"
+    "dev": "deno task dev:0 && deno task dev:1",
+    "dev:0": "deno task build:dev",
+    "dev:1": "deno run -A --watch src/server.ts",
+    "build:dev": "deno task build:dev:0 && deno task build:dev:1",
+    "build:dev:0": "./node_modules/.bin/elm make client/src/Main.elm --output=web/index.js",
+    "build:dev:1": "deno run -A scripts/fix_elm.ts web/index.js"
   }
 }
