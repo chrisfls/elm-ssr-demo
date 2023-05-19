@@ -3,6 +3,7 @@
     "std/": "https://deno.land/std@0.188.0/"
   },
   "tasks": {
-    "dev": "deno run -A --watch src/server.ts"
+    "dev": "deno run -A --watch src/server.ts",
+    "build:dev": "./node_modules/.bin/elm make client/src/Main.elm --output=web/index.js"
   }
 }
