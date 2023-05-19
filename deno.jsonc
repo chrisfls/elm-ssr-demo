@@ -3,6 +3,6 @@
     "std/": "https://deno.land/std@0.188.0/"
   },
   "tasks": {
-    "dev": "deno run --watch src/server.ts"
+    "dev": "deno run -A --watch src/server.ts"
   }
 }
