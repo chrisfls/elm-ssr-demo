@@ -1,0 +1,7 @@
+{
+  "name": "elm-ssr",
+  "private": true,
+  "devDependencies": {
+    "elm": "0.19.1-5"
+  }
+}
