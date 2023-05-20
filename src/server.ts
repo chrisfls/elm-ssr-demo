@@ -11,6 +11,10 @@ const STATIC_URL = `/${STATIC_DIR}/`;
 export async function handler(request: Request): Promise<Response> {
   const url = new URL(request.url);
 
+  if (url.pathname === "/favicon.ico") {
+    return serveDir(request, { fsRoot: STATIC_DIR });
+  }
+
   if (url.pathname.startsWith(STATIC_URL)) {
     return serveDir(request, { fsRoot: STATIC_DIR, urlRoot: STATIC_DIR });
   }
