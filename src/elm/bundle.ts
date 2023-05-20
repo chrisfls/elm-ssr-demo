@@ -1,6 +1,6 @@
 const empty = [] as unknown as RegExpMatchArray[number];
 
-export async function findLatestBundle(): Promise<string | undefined> {
+export async function findLastBundle(): Promise<string | undefined> {
   let highest = 0;
   let filename: string | undefined;
 

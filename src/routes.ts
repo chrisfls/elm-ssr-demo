@@ -6,7 +6,7 @@ import { deferred } from "std/async/deferred.ts";
 import * as Eta from "eta";
 
 import * as elm from "./elm/mod.ts";
-import { findLatestBundle } from "./elm/bundle.ts";
+import { findLastBundle } from "./elm/bundle.ts";
 import * as env from "./env.ts";
 import * as response from "./response/mod.ts";
 
@@ -23,7 +23,7 @@ type Route = {
 };
 
 const SERVER_ELM = "web/index.js";
-const CLIENT_ELM = env.development ? "index.js" : await findLatestBundle();
+const CLIENT_ELM = env.development ? "index.js" : await findLastBundle();
 
 const debug = env.development
   ? (route: Route) => [route]
@@ -42,7 +42,7 @@ export const routes: Route[] = [
     pattern: new URLPattern({ pathname: "/" }),
     async handler(): Promise<Response> {
       if (env.development) {
-        elm.compileFile("app/server/Main.elm", SERVER_ELM);
+        elm.compile("app/server/Main.elm", SERVER_ELM);
       }
 
       if (!await fs.exists("web/index.js")) {
@@ -74,7 +74,7 @@ export const routes: Route[] = [
   ...debug({
     pattern: new URLPattern({ pathname: "/index.js" }),
     async handler(): Promise<Response> {
-      elm.compileFile("app/browser/Main.elm", "public/index.js");
+      elm.compile("app/browser/Main.elm", "public/index.js");
       return await response.fileStream(
         "public/index.js",
         "application/javascript; charset=UTF-8",
