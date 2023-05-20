@@ -1,7 +1,7 @@
 import * as path from "std/path/mod.ts";
 
 import * as env from "../src/env.ts";
-import { compile } from "../src/elm/compile.ts";
+import { compileFile } from "../src/elm/compile.ts";
 
 const input: string | undefined = Deno.args[0];
 const output: string | undefined = Deno.args[1];
@@ -37,7 +37,7 @@ function pathWithTimestamp(output: string) {
   });
 }
 
-compile(
+compileFile(
   input,
   env.development ? output : pathWithTimestamp(output),
   {

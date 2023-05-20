@@ -2,5 +2,5 @@
 .vscode
 node_modules
 elm-stuff
-public/*.js
-web/*.js
+bundle.js
+bundle.*.js

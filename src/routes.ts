@@ -22,8 +22,8 @@ type Route = {
   ) => Response | Promise<Response>;
 };
 
-const SERVER_ELM = "web/index.js";
-const CLIENT_ELM = env.development ? "index.js" : await findLastBundle();
+const SERVER_ELM = "web/bundle.js";
+const CLIENT_ELM = env.development ? "bundle.js" : await findLastBundle();
 
 const debug = env.development
   ? (route: Route) => [route]
@@ -42,10 +42,10 @@ export const routes: Route[] = [
     pattern: new URLPattern({ pathname: "/" }),
     async handler(): Promise<Response> {
       if (env.development) {
-        elm.compile("app/server/Main.elm", SERVER_ELM);
+        elm.compileFile("app/server/Main.elm", SERVER_ELM);
       }
 
-      if (!await fs.exists("web/index.js")) {
+      if (!await fs.exists("web/bundle.js")) {
         return new Response(null, { status: 404 });
       }
 
@@ -70,25 +70,5 @@ export const routes: Route[] = [
 
       return await response;
     },
-  },
-  ...debug({
-    pattern: new URLPattern({ pathname: "/index.js" }),
-    async handler(): Promise<Response> {
-      elm.compile("app/browser/Main.elm", "public/index.js");
-      return await response.fileStream(
-        "public/index.js",
-        "application/javascript; charset=UTF-8",
-      );
-    },
-  }),
-  {
-    pattern: new URLPattern({ pathname: "/assets/:file" }),
-    async handler(pattern): Promise<Response> {
-      const filePath = path.join("web", pattern.pathname.groups.file);
-      return await response.fileStream(
-        filePath,
-        contentType(path.extname(pattern.pathname.groups.file)),
-      );
-    },
-  },
+  }
 ];
