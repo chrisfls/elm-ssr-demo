@@ -6,6 +6,6 @@ mkShell {
     elmPackages.elm
     elmPackages.elm-format
     elmPackages.elm-language-server
-    nodejs-16_x
+    nodejs-16_x # needed by elm-language-server
   ];
 }
