@@ -1,20 +1,20 @@
 module Main exposing (main)
 
+import App
 import Browser
-import Entrypoint
 
 
-main : Program () Entrypoint.Model Entrypoint.Msg
+main : Program () App.Model App.Msg
 main =
     Browser.application
-        { init = \flags _ _ -> Entrypoint.init flags
-        , update = Entrypoint.update
+        { init = \flags _ _ -> App.init flags
+        , update = App.update
         , view =
             \model ->
                 { title = "Title"
-                , body = [ Entrypoint.view model ]
+                , body = [ App.view model ]
                 }
         , subscriptions = \_ -> Sub.none
-        , onUrlChange = \_ -> Entrypoint.Noop
-        , onUrlRequest = \_ -> Entrypoint.Noop
+        , onUrlChange = \_ -> App.Noop
+        , onUrlRequest = \_ -> App.Noop
         }

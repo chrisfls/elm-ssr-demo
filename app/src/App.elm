@@ -1,8 +1,8 @@
-module Entrypoint exposing (..)
+module App exposing (..)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.String exposing (..)
+import Html.String.Attributes exposing (..)
+import Html.String.Events exposing (onInput)
 
 
 
