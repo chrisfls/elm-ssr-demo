@@ -1,6 +1,6 @@
 .direnv
 .vscode
-node_modules
-elm-stuff
-bundle.js
 bundle.*.js
+bundle.js
+elm-stuff
+node_modules

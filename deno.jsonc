@@ -7,6 +7,7 @@
     "@mikro-orm/core": "npm:@mikro-orm/core@5.7.7"
   },
   "tasks": {
+    "fmt": "./node_modules/.bin/elm-format .",
     "run": "deno run -A src/server.ts",
     "dev": "deno run -A --watch src/server.ts",
     "dev:build": "export ENV=production && deno task build",
