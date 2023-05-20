@@ -68,7 +68,7 @@ export async function handler(request: Request): Promise<Response> {
 
   if (env.development && url.pathname === "/bundle.js") {
     return new Response(
-      await elm.compileString("app/browser/Main.elm", "static/bundle.js"),
+      await elm.compileString("app/client/Main.elm", "static/bundle.js"),
       {
         status: 200,
         headers: { "content-type": "application/javascript" },
