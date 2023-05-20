@@ -2,7 +2,9 @@
   "imports": {
     "std/": "https://deno.land/std@0.188.0/",
     "node-elm-compiler": "https://esm.sh/node-elm-compiler@5.0.6",
-    "eta": "https://deno.land/x/eta@v2.1.0/mod.ts"
+    "eta": "https://deno.land/x/eta@v2.1.0/mod.ts",
+    "@mikro-orm/postgresql": "npm:@mikro-orm/postgresql@5.7.7",
+    "@mikro-orm/core": "npm:@mikro-orm/core@5.7.7"
   },
   "tasks": {
     "run": "deno run -A src/server.ts",
