@@ -1,5 +1,12 @@
+# direnv generated files
 .direnv
+
+# vscode settings
 .vscode
+
+# elm-package generated files
+elm-stuff
+
+# elm generated files
 bundle.*.js
 bundle.js
-elm-stuff
