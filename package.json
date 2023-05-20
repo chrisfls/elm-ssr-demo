@@ -1,6 +1,9 @@
 {
   "name": "elm-ssr",
   "private": true,
+  "scripts": {
+    "postinstall": "ln -sf ../node_modules app/node_modules"
+  },
   "devDependencies": {
     "elm": "0.19.1-5",
     "elm-format": "^0.8.7"
