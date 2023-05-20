@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import App
 import IntDict exposing (IntDict)
+import Html.String
 
 port http : ({ id: Int, url: String } -> msg) -> Sub msg
 
@@ -21,13 +22,14 @@ main =
 
 
 type alias Model =
-    { models : IntDict App.Model
-    }
+     IntDict App.Model
 
 
 init : () -> ( Model , Cmd Msg )
 init () =
-    ( { models = IntDict.empty }, Cmd.none )
+    ( IntDict.empty
+    , Cmd.none
+    )
 
 
 
@@ -36,14 +38,38 @@ init () =
 
 type Msg
     = Request { id: Int, url: String }
+    | Forward Int App.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Request { id, url } ->
-            -- Application.init
-            ( model, html { id = id, html = "Hello, World!"} )
+            updateApp id model (App.init ())
+
+        Forward id forward ->
+            case IntDict.get id model of
+                Just app ->
+                    updateApp id model (App.update forward app)
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+updateApp : Int -> IntDict App.Model -> ( App.Model, Cmd App.Msg ) -> ( IntDict App.Model, Cmd Msg )
+updateApp id model ( app, cmd ) =
+    if App.ready app then
+        ( IntDict.remove id model
+        , html
+            { id = id
+            , html = Html.String.toString 0 (App.view app)
+            }
+        )
+        
+    else
+        ( IntDict.insert id app model
+        , Cmd.map (Forward id) cmd
+        )
+
 
 
 subscriptions : Model -> Sub Msg

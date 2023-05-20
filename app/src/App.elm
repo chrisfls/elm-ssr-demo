@@ -1,4 +1,4 @@
-module App exposing (..)
+module App exposing (Model, Msg(..), init, ready, subscriptions, title, update, view)
 
 import Html.String exposing (..)
 import Html.String.Attributes exposing (..)
@@ -48,8 +48,23 @@ update msg model =
             ( model, Cmd.none )
 
 
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.none
+
+
 
 -- VIEW
+
+
+ready : Model -> Bool
+ready _ =
+    True
+
+
+title : Model -> String
+title _ =
+    "Example Title"
 
 
 view : Model -> Html Msg

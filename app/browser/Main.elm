@@ -11,10 +11,10 @@ main =
         , update = App.update
         , view =
             \model ->
-                { title = "Title"
+                { title = App.title model
                 , body = [ App.view model ]
                 }
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = App.subscriptions
         , onUrlChange = \_ -> App.Noop
         , onUrlRequest = \_ -> App.Noop
         }
