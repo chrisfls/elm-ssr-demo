@@ -3,17 +3,21 @@ import { serveDir } from "std/http/file_server.ts";
 
 import * as elm from "./elm/mod.ts";
 import * as env from "./env.ts";
+import { router } from "./router.ts";
+
+const STATIC_DIR = "static";
+const STATIC_URL = `/${STATIC_DIR}/`;
 
 export async function handler(request: Request): Promise<Response> {
-  const pathname = new URL(request.url).pathname;
+  const url = new URL(request.url);
 
-  if (pathname.startsWith("/static")) {
-    return serveDir(request, { fsRoot: "public", urlRoot: "static" });
+  if (url.pathname.startsWith(STATIC_URL)) {
+    return serveDir(request, { fsRoot: STATIC_DIR, urlRoot: STATIC_DIR });
   }
 
-  if (env.development && pathname === "bundle.js") {
+  if (env.development && url.pathname === "/bundle.js") {
     return new Response(
-      await elm.compileString("app/browser/Main.elm", "public/bundle.js"),
+      await elm.compileString("app/browser/Main.elm", "static/bundle.js"),
       {
         status: 200,
         headers: { "content-type": "application/javascript" },
@@ -21,13 +25,7 @@ export async function handler(request: Request): Promise<Response> {
     );
   }
 
-  // for (const route of routes) {
-  //   const match = route.pattern.exec(request.url);
-  //   if (match === null) continue;
-  //   return await route.handler(match, request);
-  // }
-
-  return await new Response(null, { status: 404 });
+  return router(request, url);
 }
 
 if (import.meta.main) {

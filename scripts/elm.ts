@@ -1,10 +1,18 @@
 import * as path from "std/path/mod.ts";
+import * as flags from "std/flags/mod.ts";
 
 import * as env from "../src/env.ts";
 import { compileFile } from "../src/elm/compile.ts";
 
-const input: string | undefined = Deno.args[0];
-const output: string | undefined = Deno.args[1];
+const args: {
+  in?: string;
+  out?: string;
+  "no-timestamp"?: boolean;
+} = flags.parse(Deno.args);
+
+const input = args.in;
+const output = args.out;
+const timestamp = !args["no-timestamp"];
 
 const isString = (value: unknown): value is string => {
   return typeof value === "string";
@@ -39,7 +47,7 @@ function pathWithTimestamp(output: string) {
 
 compileFile(
   input,
-  env.development ? output : pathWithTimestamp(output),
+  timestamp && !env.development ? pathWithTimestamp(output) : output,
   {
     debug: env.development,
     optimize: !env.development,

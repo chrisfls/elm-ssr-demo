@@ -24,7 +24,7 @@ type alias Model =
 
 
 init () =
-    (Model "" "" "", ssr "Hello, World!")
+    (Model "" "" "", Cmd.none )
 
 
 
@@ -35,6 +35,7 @@ type Msg
     = Name String
     | Password String
     | PasswordAgain String
+    | Request { id: Int, url: String }
 
 
 update msg model =
@@ -47,6 +48,9 @@ update msg model =
 
         PasswordAgain password ->
             ({ model | passwordAgain = password }, Cmd.none)
+
+        Request { id, url } ->
+            ( model, html { id = id, html = "Hello, World!"} )
 
 
 
@@ -77,8 +81,10 @@ viewValidation model =
         div [ style "color" "red" ] [ text "Passwords do not match!" ]
 
 
+subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    http Request
 
+port http : ({ id: Int, url: String } -> msg) -> Sub msg
 
-port ssr : String -> Cmd msg
+port html : { id: Int, html: String } -> Cmd msg
