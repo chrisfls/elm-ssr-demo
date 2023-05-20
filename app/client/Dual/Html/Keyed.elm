@@ -1,7 +1,7 @@
-module Html.String.Keyed exposing (..)
+module Dual.Html.Keyed exposing (..)
 
+import Dual.Html exposing (Attribute, Html)
 import Html.Keyed
-import Html.String exposing (Attribute, Html)
 
 
 node : String -> List (Attribute msg) -> List ( String, Html msg ) -> Html msg

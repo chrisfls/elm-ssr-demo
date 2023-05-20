@@ -1,7 +1,7 @@
-module Html.String.Events exposing (..)
+module Dual.Html.Events exposing (..)
 
+import Dual.Html exposing (Attribute)
 import Html.Events
-import Html.String exposing (Attribute)
 import Json.Decode exposing (Decoder)
 
 

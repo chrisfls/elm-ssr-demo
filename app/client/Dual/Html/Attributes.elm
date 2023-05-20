@@ -1,7 +1,7 @@
-module Html.String.Attributes exposing (..)
+module Dual.Html.Attributes exposing (..)
 
+import Dual.Html exposing (Attribute)
 import Html.Attributes
-import Html.String exposing (Attribute)
 import Json.Decode exposing (Value)
 
 style : String -> String -> Attribute msg

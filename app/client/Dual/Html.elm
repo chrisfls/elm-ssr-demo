@@ -1,4 +1,4 @@
-module Html.String exposing (..)
+module Dual.Html exposing (..)
 
 import Html
 

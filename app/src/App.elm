@@ -1,8 +1,8 @@
 module App exposing (Model, Msg(..), init, ready, subscriptions, title, update, view)
 
-import Html.String exposing (..)
-import Html.String.Attributes exposing (..)
-import Html.String.Events exposing (onInput)
+import Dual.Html exposing (..)
+import Dual.Html.Attributes exposing (..)
+import Dual.Html.Events exposing (onInput)
 
 
 

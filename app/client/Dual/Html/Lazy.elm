@@ -1,6 +1,6 @@
-module Html.String.Lazy exposing (..)
+module Dual.Html.Lazy exposing (..)
 
-import Html exposing (Html)
+import Dual.Html exposing (Html)
 import Html.Lazy
 
 
