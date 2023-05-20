@@ -9,7 +9,7 @@
     "dev": "deno run -A --watch src/server.ts",
     "dev:build": "export ENV=production && deno task build",
     "build": "deno task build:client && deno task build:server",
-    "build:client": "deno run -A scripts/elm.ts --in app/client/Main.elm --out static/bundle.js",
+    "build:client": "deno run -A scripts/elm.ts --in client/Main.elm --out static/bundle.js --cwd app",
     "build:server": "deno run -A scripts/elm.ts --in app/server/Main.elm --out web/bundle.js --no-timestamp"
   }
 }

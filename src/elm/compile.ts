@@ -3,6 +3,7 @@ import * as elm from "node-elm-compiler";
 type Options = {
   debug: boolean;
   optimize: boolean;
+  cwd: string
 };
 
 export async function compileString(
@@ -15,7 +16,7 @@ export async function compileString(
     {
       output,
       pathToElm: "./node_modules/.bin/elm",
-      cwd: Deno.cwd(),
+      cwd: options?.cwd ?? Deno.cwd(),
       debug: options?.debug ?? true,
       optimize: options?.optimize ?? false,
       verbose: true,

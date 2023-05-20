@@ -30,6 +30,7 @@ const STATIC_URL = `/${STATIC_DIR}/`;
 
 const SERVER_ELM = "web/bundle.js";
 const CLIENT_ELM = env.development ? "bundle.js" : await findLastBundle();
+const CLIENT_ROOT = path.join(Deno.cwd(), "app");
 
 if (!await fs.exists(SERVER_ELM)) {
   throw new Error(`'${SERVER_ELM}' not found.`);
@@ -68,7 +69,9 @@ export async function handler(request: Request): Promise<Response> {
 
   if (env.development && url.pathname === "/bundle.js") {
     return new Response(
-      await elm.compileString("app/client/Main.elm", "static/bundle.js"),
+      await elm.compileString("client/Main.elm", "../static/bundle.js", {
+        cwd: CLIENT_ROOT,
+      }),
       {
         status: 200,
         headers: { "content-type": "application/javascript" },

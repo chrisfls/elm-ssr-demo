@@ -7,11 +7,13 @@ import { compileFile } from "../src/elm/compile.ts";
 const args: {
   in?: string;
   out?: string;
+  cwd?: string;
   "no-timestamp"?: boolean;
 } = flags.parse(Deno.args);
 
 const input = args.in;
 const output = args.out;
+const cwd = args.cwd ?? Deno.cwd();
 const timestamp = !args["no-timestamp"];
 
 const isString = (value: unknown): value is string => {
@@ -49,6 +51,7 @@ compileFile(
   input,
   timestamp && !env.development ? pathWithTimestamp(output) : output,
   {
+    cwd,
     debug: env.development,
     optimize: !env.development,
   },
