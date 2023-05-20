@@ -1,9 +1,11 @@
 import { contentType } from "std/media_types/content_type.ts";
 import * as path from "std/path/mod.ts";
+import * as fs from "std/fs/mod.ts";
+import { deferred } from "std/async/deferred.ts";
 
 import * as Eta from "eta";
 
-import { compile } from "./elm/compile.ts";
+import * as elm from "./elm/mod.ts";
 import { findLatestBundle } from "./elm/bundle.ts";
 import * as env from "./env.ts";
 import * as response from "./response/mod.ts";
@@ -20,38 +22,59 @@ type Route = {
   ) => Response | Promise<Response>;
 };
 
-const bundle = env.development ? "index.js" : await findLatestBundle();
+const SERVER_ELM = "web/index.js";
+const CLIENT_ELM = env.development ? "index.js" : await findLatestBundle();
 
 const debug = env.development
   ? (route: Route) => [route]
   : (_route: Route) => [];
 
-if (bundle === undefined) {
+if (CLIENT_ELM === undefined) {
   throw new Error("No elm app bundle found");
 }
+
+type Ports = {
+  ssr: elm.PortWithSubscription<string>;
+};
 
 export const routes: Route[] = [
   {
     pattern: new URLPattern({ pathname: "/" }),
     async handler(): Promise<Response> {
+      if (env.development) {
+        elm.compileFile("app/server/Main.elm", SERVER_ELM);
+      }
 
-      const ssr = await Eta.renderFileAsync("index", {
-        bundle,
-        ssr: "",
-      });
+      if (!await fs.exists("web/index.js")) {
+        return new Response(null, { status: 404 });
+      }
 
-      return new Response(ssr, {
-        status: 200,
-        headers: {
-          "content-type": "text/html",
-        },
-      });
+      const app = (await elm.load<Ports>(SERVER_ELM)).Main.init({});
+      const response = deferred<Response>();
+
+      async function subscription(ssr: string) {
+        app.ports.ssr.unsubscribe(subscription);
+
+        response.resolve(
+          new Response(
+            await Eta.renderFileAsync("index", { bundle: CLIENT_ELM, ssr }),
+            {
+              status: 200,
+              headers: { "content-type": "text/html" },
+            },
+          ),
+        );
+      }
+
+      app.ports.ssr.subscribe(subscription);
+
+      return await response;
     },
   },
   ...debug({
     pattern: new URLPattern({ pathname: "/index.js" }),
     async handler(): Promise<Response> {
-      compile("app/browser/Main.elm", "public/index.js");
+      elm.compileFile("app/browser/Main.elm", "public/index.js");
       return await response.fileStream(
         "public/index.js",
         "application/javascript; charset=UTF-8",
