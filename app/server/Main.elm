@@ -1,14 +1,18 @@
 port module Main exposing (Model, Msg(..), init, main, update)
 
+import App
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import App
-import IntDict exposing (IntDict)
 import Html.String
+import IntDict exposing (IntDict)
 
-port http : ({ id: Int, url: String } -> msg) -> Sub msg
 
-port html : { id: Int, html: String } -> Cmd msg
+port http : ({ id : Int, url : String } -> msg) -> Sub msg
+
+
+port html : { id : Int, html : String } -> Cmd msg
+
+
 
 -- MAIN
 
@@ -18,14 +22,15 @@ main =
     Platform.worker { init = init, update = update, subscriptions = subscriptions }
 
 
+
 -- MODEL
 
 
 type alias Model =
-     IntDict App.Model
+    IntDict App.Model
 
 
-init : () -> ( Model , Cmd Msg )
+init : () -> ( Model, Cmd Msg )
 init () =
     ( IntDict.empty
     , Cmd.none
@@ -37,7 +42,7 @@ init () =
 
 
 type Msg
-    = Request { id: Int, url: String }
+    = Request { id : Int, url : String }
     | Forward Int App.Msg
 
 
@@ -55,6 +60,7 @@ update msg model =
                 Nothing ->
                     ( model, Cmd.none )
 
+
 updateApp : Int -> IntDict App.Model -> ( App.Model, Cmd App.Msg ) -> ( IntDict App.Model, Cmd Msg )
 updateApp id model ( app, cmd ) =
     if App.ready app then
@@ -64,12 +70,11 @@ updateApp id model ( app, cmd ) =
             , html = Html.String.toString 0 (App.view app)
             }
         )
-        
+
     else
         ( IntDict.insert id app model
         , Cmd.map (Forward id) cmd
         )
-
 
 
 subscriptions : Model -> Sub Msg

@@ -4,6 +4,7 @@ import Dual.Html exposing (Attribute)
 import Html.String.Attributes as Attributes
 import Json.Decode exposing (Value)
 
+
 style : String -> String -> Attribute msg
 style =
     Attributes.style

@@ -25,12 +25,12 @@ lazy4 f x y z w =
 
 
 lazy5 : (a -> b -> c -> d -> e -> Html msg) -> a -> b -> c -> d -> e -> Html msg
-lazy5 f x y z w  =
+lazy5 f x y z w =
     f x y z w
 
 
 lazy6 : (a -> b -> c -> d -> e -> f -> Html msg) -> a -> b -> c -> d -> e -> f -> Html msg
-lazy6 f x y z w a  =
+lazy6 f x y z w a =
     f x y z w a
 
 
