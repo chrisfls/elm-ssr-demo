@@ -44,7 +44,7 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Request { id, url } ->
+        Request { id } ->
             updateApp id model (App.init ())
 
         Forward id forward ->
