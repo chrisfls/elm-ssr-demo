@@ -10,7 +10,7 @@ import Html.Events exposing (onInput)
 
 
 main =
-    Platform.worker { init = init, update = update }
+    Platform.worker { init = init, update = update, subscriptions = subscriptions }
 
 
 
@@ -24,9 +24,8 @@ type alias Model =
     }
 
 
-init : Model
-init =
-    Model "" "" ""
+init () =
+    (Model "" "" "", Cmd.none)
 
 
 
@@ -39,17 +38,16 @@ type Msg
     | PasswordAgain String
 
 
-update : Msg -> Model -> Model
 update msg model =
     case msg of
         Name name ->
-            { model | name = name }
+            ({ model | name = name }, Cmd.none)
 
         Password password ->
-            { model | password = password }
+            ({ model | password = password }, Cmd.none)
 
         PasswordAgain password ->
-            { model | passwordAgain = password }
+            ({ model | passwordAgain = password }, Cmd.none)
 
 
 
@@ -78,3 +76,7 @@ viewValidation model =
 
     else
         div [ style "color" "red" ] [ text "Passwords do not match!" ]
+
+
+subscriptions _ =
+    Sub.none
