@@ -2,6 +2,7 @@ module Dual.Html exposing (..)
 
 import Html.String as Html
 
+-- TODO: stop using Html.String, render a string directly instead
 
 type alias Html msg =
     Html.Html msg
