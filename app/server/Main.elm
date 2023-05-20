@@ -1,5 +1,4 @@
-
-module Main exposing (Model, Msg(..), init, main, update, view, viewInput, viewValidation)
+port module Main exposing (Model, Msg(..), init, main, update, view, viewInput, viewValidation)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -25,7 +24,7 @@ type alias Model =
 
 
 init () =
-    (Model "" "" "", Cmd.none)
+    (Model "" "" "", ssr "Hello, World!")
 
 
 
@@ -80,3 +79,6 @@ viewValidation model =
 
 subscriptions _ =
     Sub.none
+
+
+port ssr : String -> Cmd msg
