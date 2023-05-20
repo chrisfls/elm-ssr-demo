@@ -13,7 +13,6 @@ Eta.configure({
 });
 
 type Route = {
-  debug?: true;
   pattern: URLPattern;
   handler: (
     pattern: URLPatternResult,
@@ -21,17 +20,20 @@ type Route = {
   ) => Response | Promise<Response>;
 };
 
-const latestBundle = await findLatestBundle();
+const bundle = env.development ? "index.js" : await findLatestBundle();
+
+const debug = env.development
+  ? (route: Route) => [route]
+  : (_route: Route) => [];
+
+if (bundle === undefined) {
+  throw new Error("No elm app bundle found");
+}
 
 export const routes: Route[] = [
   {
     pattern: new URLPattern({ pathname: "/" }),
     async handler(): Promise<Response> {
-      const bundle = env.development ? "index.js" : latestBundle;
-
-      if (bundle === undefined) {
-        return new Response(null, { status: 404 });
-      }
 
       const ssr = await Eta.renderFileAsync("index", {
         bundle,
@@ -46,8 +48,7 @@ export const routes: Route[] = [
       });
     },
   },
-  {
-    debug: true,
+  ...debug({
     pattern: new URLPattern({ pathname: "/index.js" }),
     async handler(): Promise<Response> {
       compile("app/browser/Main.elm", "public/index.js");
@@ -56,7 +57,7 @@ export const routes: Route[] = [
         "application/javascript; charset=UTF-8",
       );
     },
-  },
+  }),
   {
     pattern: new URLPattern({ pathname: "/assets/:file" }),
     async handler(pattern): Promise<Response> {
