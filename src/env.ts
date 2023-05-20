@@ -1,1 +1,1 @@
-export const development = Deno.env.get("ENVIRONMENT") !== "production";
+export const development = Deno.env.get("ENV") !== "production";

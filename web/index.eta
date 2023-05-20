@@ -6,9 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   </head>
   <body>
-    <div id="temp"><%= it.ssr %></div>
-    <div id="main"></div>
+    <div id="main"><%= it.ssr %></div>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="<%= it.bundle %>"></script>
+    <script>
+      var app = Elm.Main.init({ node: document.getElementById("main") });
+    </script>
   </body>
 </html>

@@ -1,3 +1,5 @@
+import * as path from "std/path/mod.ts";
+
 import * as env from "../src/env.ts";
 import { compile } from "../src/elm/compile.ts";
 
@@ -27,7 +29,19 @@ const assertFilePath: (
 assertFilePath(input, { what: "input", where: "first" });
 assertFilePath(output, { what: "output", where: "second" });
 
-compile(input, output, {
-  debug: env.development,
-  optimize: !env.development,
-});
+function pathWithTimestamp(output: string) {
+  const parsed = path.parse(output);
+  return path.format({
+    ...parsed,
+    base: `${parsed.name}.${Date.now()}${parsed.ext}`,
+  });
+}
+
+compile(
+  input,
+  env.development ? output : pathWithTimestamp(output),
+  {
+    debug: env.development,
+    optimize: !env.development,
+  },
+);

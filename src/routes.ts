@@ -3,8 +3,10 @@ import * as path from "std/path/mod.ts";
 
 import * as Eta from "eta";
 
+import { compile } from "./elm/compile.ts";
+import { findLatestBundle } from "./elm/bundle.ts";
+import * as env from "./env.ts";
 import * as response from "./response/mod.ts";
-import * as elm from "./elm/compile.ts";
 
 Eta.configure({
   views: path.join(Deno.cwd(), "web"),
@@ -19,19 +21,36 @@ type Route = {
   ) => Response | Promise<Response>;
 };
 
+const latestBundle = await findLatestBundle();
+
 export const routes: Route[] = [
   {
     pattern: new URLPattern({ pathname: "/" }),
-    handler(_req, _pattern): Response {
-      Eta.renderFileAsync("index", {});
-      return new Response("A");
+    async handler(): Promise<Response> {
+      const bundle = env.development ? "index.js" : latestBundle;
+
+      if (bundle === undefined) {
+        return new Response(null, { status: 404 });
+      }
+
+      const ssr = await Eta.renderFileAsync("index", {
+        bundle,
+        ssr: "",
+      });
+
+      return new Response(ssr, {
+        status: 200,
+        headers: {
+          "content-type": "text/html",
+        },
+      });
     },
   },
   {
     debug: true,
     pattern: new URLPattern({ pathname: "/index.js" }),
-    async handler(_req, _pattern): Promise<Response> {
-      elm.compile("app/browser/Main.elm", "public/index.js");
+    async handler(): Promise<Response> {
+      compile("app/browser/Main.elm", "public/index.js");
       return await response.fileStream(
         "public/index.js",
         "application/javascript; charset=UTF-8",
@@ -40,11 +59,11 @@ export const routes: Route[] = [
   },
   {
     pattern: new URLPattern({ pathname: "/assets/:file" }),
-    async handler(_pattern): Promise<Response> {
-      const filePath = path.join("web", _pattern.pathname.groups.file);
+    async handler(pattern): Promise<Response> {
+      const filePath = path.join("web", pattern.pathname.groups.file);
       return await response.fileStream(
         filePath,
-        contentType(path.extname(_pattern.pathname.groups.file)),
+        contentType(path.extname(pattern.pathname.groups.file)),
       );
     },
   },
