@@ -5,7 +5,7 @@
     "eta": "https://deno.land/x/eta@v2.1.0/mod.ts"
   },
   "tasks": {
-    "fmt": "./node_modules/.bin/elm-format .",
+    "fmt": "elm-format .",
     "run": "deno run -A src/server.ts",
     "dev": "deno run -A --watch src/server.ts",
     "dev:build": "export ENV=production && deno task build",

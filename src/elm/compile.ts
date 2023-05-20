@@ -15,7 +15,7 @@ export async function compileString(
     [input],
     {
       output,
-      pathToElm: "./node_modules/.bin/elm",
+      pathToElm: "elm",
       cwd: options?.cwd ?? Deno.cwd(),
       debug: options?.debug ?? true,
       optimize: options?.optimize ?? false,
