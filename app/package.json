@@ -1,9 +1,6 @@
 {
-  "name": "elm-ssr",
+  "name": "app",
   "private": true,
-  "scripts": {
-    "postinstall": "cd app && pnpm install"
-  },
   "devDependencies": {
     "elm": "0.19.1-5",
     "elm-format": "^0.8.7"
