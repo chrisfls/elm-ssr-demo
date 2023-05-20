@@ -29,7 +29,9 @@ const STATIC_DIR = "static";
 const STATIC_URL = `/${STATIC_DIR}/`;
 
 const SERVER_ELM = "web/bundle.js";
-const CLIENT_ELM = env.development ? "bundle.js" : await findLastBundle();
+const CLIENT_ELM = env.development
+  ? "bundle.js"
+  : await findLastBundle(STATIC_DIR);
 const CLIENT_ROOT = path.join(Deno.cwd(), "app");
 
 if (!await fs.exists(SERVER_ELM)) {

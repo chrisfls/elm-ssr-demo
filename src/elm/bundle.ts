@@ -1,10 +1,12 @@
+import * as path from "std/path/mod.ts";
+
 const empty = [] as unknown as RegExpMatchArray[number];
 
-export async function findLastBundle(): Promise<string | undefined> {
+export async function findLastBundle(dir: string): Promise<string | undefined> {
   let highest = 0;
   let filename: string | undefined;
 
-  for await (const entry of Deno.readDir("static")) {
+  for await (const entry of Deno.readDir(dir)) {
     if (!entry.isFile) continue;
     const match = (entry.name.match(/^bundle\.(\d+)\.js$/) ?? empty)[1];
     if (match === undefined) continue;
@@ -15,5 +17,5 @@ export async function findLastBundle(): Promise<string | undefined> {
     }
   }
 
-  return filename;
+  if (filename) return path.join(dir, filename);
 }
