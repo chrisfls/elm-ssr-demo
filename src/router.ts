@@ -1,4 +1,3 @@
-import { contentType } from "std/media_types/content_type.ts";
 import * as path from "std/path/mod.ts";
 import * as fs from "std/fs/mod.ts";
 import { Deferred, deferred } from "std/async/deferred.ts";
@@ -8,7 +7,6 @@ import * as eta from "eta";
 import * as elm from "./elm/mod.ts";
 import { findLastBundle } from "./elm/bundle.ts";
 import * as env from "./env.ts";
-import * as response from "./response/mod.ts";
 
 const SERVER_ELM = "web/bundle.js";
 const CLIENT_ELM = env.development ? "bundle.js" : await findLastBundle();
