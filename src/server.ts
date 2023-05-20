@@ -43,8 +43,7 @@ eta.configure({
   views: path.join(Deno.cwd(), "web"),
 });
 
-let app = (await elm.load<Ports>(SERVER_ELM)).Main.init({});
-
+const app = (await elm.load<Ports>(SERVER_ELM)).Main.init({});
 const promises = new Map<number, Deferred<string>>();
 
 function subscription({ id, html }: HtmlMsg) {
@@ -53,12 +52,6 @@ function subscription({ id, html }: HtmlMsg) {
 }
 
 app.ports.html.subscribe(subscription);
-
-async function reload() {
-  app.ports.html.unsubscribe(subscription);
-  app = (await elm.load<Ports>(SERVER_ELM)).Main.init({});
-  app.ports.html.subscribe(subscription);
-}
 
 let count = 0;
 
@@ -85,7 +78,7 @@ export async function handler(request: Request): Promise<Response> {
 
   if (env.development) {
     await elm.compileFile("app/server/Main.elm", SERVER_ELM);
-    reload();
+    await elm.load<Ports>(SERVER_ELM);
   }
 
   const id = ++count;
