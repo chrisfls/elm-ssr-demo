@@ -4,9 +4,9 @@ export async function findLastBundle(): Promise<string | undefined> {
   let highest = 0;
   let filename: string | undefined;
 
-  for await (const entry of Deno.readDir("public")) {
+  for await (const entry of Deno.readDir("static")) {
     if (!entry.isFile) continue;
-    const match = (entry.name.match(/^index\.(\d+)\.js$/) ?? empty)[1];
+    const match = (entry.name.match(/^bundle\.(\d+)\.js$/) ?? empty)[1];
     if (match === undefined) continue;
     const timestamp = parseInt(match);
     if (timestamp > highest) {
