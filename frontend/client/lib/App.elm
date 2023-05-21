@@ -3,9 +3,13 @@ module App exposing (Flags, Model, Msg(..), encoder, init, ready, subscriptions,
 import Dual.Html exposing (..)
 import Dual.Html.Attributes exposing (..)
 import Dual.Html.Events exposing (onInput)
+import Graphql.Http
+import Graphql.Operation exposing (RootQuery)
+import Graphql.SelectionSet exposing (SelectionSet)
 import Headers exposing (Headers)
 import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Encode as Encode
+import Query.User as User
 
 
 
@@ -16,6 +20,7 @@ type alias Model =
     { name : String
     , password : String
     , passwordAgain : String
+    , loaded : Bool
     , headers : Headers
     }
 
@@ -37,24 +42,37 @@ init flags =
             ( model, Cmd.none )
 
         Ok Nothing ->
-            ( empty flags.headers, Cmd.none )
+            load flags.headers
 
         Err _ ->
             -- TODO: report error through a log port
-            ( empty flags.headers, Cmd.none )
+            load flags.headers
 
 
-empty : Maybe Headers -> Model
+load : Maybe Headers -> ( Model, Cmd Msg )
+load headers =
+    ( empty (Maybe.withDefault Headers.empty headers)
+    , requestQuery Loaded User.query
+    )
+
+
+empty : Headers -> Model
 empty headers =
-    Model "" "" "" (Maybe.withDefault Headers.empty headers)
+    { name = ""
+    , password = ""
+    , passwordAgain = ""
+    , loaded = False
+    , headers = headers
+    }
 
 
 decoder : Decoder (Maybe Model)
 decoder =
-    Decode.map4 Model
+    Decode.map5 Model
         (Decode.field "name" Decode.string)
         (Decode.field "password" Decode.string)
         (Decode.field "passwordAgain" Decode.string)
+        (Decode.field "loaded" Decode.bool)
         (Decode.field "headers" Headers.decoder)
         |> Decode.nullable
 
@@ -65,6 +83,7 @@ encoder model =
         [ ( "name", Encode.string model.name )
         , ( "password", Encode.string model.password )
         , ( "passwordAgain", Encode.string model.passwordAgain )
+        , ( "loaded", Encode.bool model.loaded )
         , ( "headers", Headers.encoder model.headers )
         ]
 
@@ -77,6 +96,7 @@ type Msg
     = Name String
     | Password String
     | PasswordAgain String
+    | Loaded (Result (Graphql.Http.Error User.Data) User.Data)
     | Noop
 
 
@@ -92,6 +112,20 @@ update msg model =
         PasswordAgain password ->
             ( { model | passwordAgain = password }, Cmd.none )
 
+        Loaded (Ok data) ->
+            ( { model
+                | name = data.name
+                , password = data.password
+                , passwordAgain = data.passwordAgain
+                , loaded = True
+              }
+            , Cmd.none
+            )
+
+        Loaded _ ->
+            -- TODO: report error through log port
+            ( model, Cmd.none )
+
         Noop ->
             ( model, Cmd.none )
 
@@ -106,8 +140,8 @@ subscriptions _ =
 
 
 ready : Model -> Bool
-ready _ =
-    True
+ready model =
+    model.loaded
 
 
 title : Model -> String
@@ -137,3 +171,16 @@ viewValidation model =
 
     else
         div [ style "color" "red" ] [ text "Passwords do not match!" ]
+
+
+
+-- COMMANDS
+
+
+requestQuery :
+    (Result (Graphql.Http.Error decodesTo) decodesTo -> msg)
+    -> SelectionSet decodesTo RootQuery
+    -> Cmd msg
+requestQuery msg =
+    Graphql.Http.queryRequest "http://localhost:4000"
+        >> Graphql.Http.send msg

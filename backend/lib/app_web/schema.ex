@@ -11,9 +11,9 @@ defmodule AppWeb.Schema do
 
   @desc "An user"
   object :user do
-    field :username, :string
-    field :password, :string
-    field :password_again, :string
+    field :username, non_null(:string)
+    field :password, non_null(:string)
+    field :password_again, non_null(:string)
   end
 
   query do

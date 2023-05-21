@@ -19,16 +19,16 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-password : SelectionSet (Maybe String) Api.Object.User
+password : SelectionSet String Api.Object.User
 password =
-    Object.selectionForField "(Maybe String)" "password" [] (Decode.string |> Decode.nullable)
+    Object.selectionForField "String" "password" [] Decode.string
 
 
-passwordAgain : SelectionSet (Maybe String) Api.Object.User
+passwordAgain : SelectionSet String Api.Object.User
 passwordAgain =
-    Object.selectionForField "(Maybe String)" "passwordAgain" [] (Decode.string |> Decode.nullable)
+    Object.selectionForField "String" "passwordAgain" [] Decode.string
 
 
-username : SelectionSet (Maybe String) Api.Object.User
+username : SelectionSet String Api.Object.User
 username =
-    Object.selectionForField "(Maybe String)" "username" [] (Decode.string |> Decode.nullable)
+    Object.selectionForField "String" "username" [] Decode.string
