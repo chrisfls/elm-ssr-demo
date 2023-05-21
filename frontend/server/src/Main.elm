@@ -48,7 +48,7 @@ init () =
 type Msg
     = Http { id : Int, url : String, headers : Value }
     | Timeout { id : Int }
-    | Forward Int App.Msg
+    | Msg Int App.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -58,12 +58,14 @@ update msg model =
             updateApp id model (App.init ())
 
         Timeout { id } ->
-            ( model, Cmd.none )
+            ( IntDict.remove id model
+            , Cmd.none
+            )
 
-        Forward id forward ->
+        Msg id appMsg ->
             case IntDict.get id model of
                 Just app ->
-                    updateApp id model (App.update forward app)
+                    updateApp id model (App.update appMsg app)
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -81,7 +83,7 @@ updateApp id model ( app, cmd ) =
 
     else
         ( IntDict.insert id app model
-        , Cmd.map (Forward id) cmd
+        , Cmd.map (Msg id) cmd
         )
 
 
