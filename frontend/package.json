@@ -1,0 +1,8 @@
+{
+  "name": "frontend",
+  "private": true,
+  "devDependencies": {
+    "@dillonkearns/elm-graphql": "^4.3.1",
+    "graphql": "16"
+  }
+}

@@ -8,5 +8,6 @@ mkShell {
     elmPackages.elm-test
     elmPackages.elm-review
     nodejs-16_x # needed by elm-language-server
+    nodePackages.pnpm # needed by elm-graphql
   ];
 }
