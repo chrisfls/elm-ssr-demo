@@ -27,3 +27,6 @@ app-*.tar
 
 # Postgres artifacts from docker-compose
 data
+
+# Direnv artifacts
+.direnv
