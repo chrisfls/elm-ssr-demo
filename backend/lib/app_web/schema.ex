@@ -3,22 +3,23 @@ defmodule AppWeb.Schema do
   use Absinthe.Schema
 
   # Example data
-  @items %{
-    "foo" => %{id: "foo", name: "Foo"},
-    "bar" => %{id: "bar", name: "Bar"}
+  @user %{
+    username: "Foo",
+    password: "Bar",
+    password_again: "Bar",
   }
 
-  @desc "An item"
-  object :item do
-    field :id, :id
-    field :name, :string
+  @desc "An user"
+  object :user do
+    field :username, :string
+    field :password, :string
+    field :password_again, :string
   end
 
   query do
-    field :item, :item do
-      arg :id, non_null(:id)
-      resolve fn %{id: item_id}, _ ->
-        {:ok, @items[item_id]}
+    field :user, :user do
+      resolve fn %{}, _ ->
+        {:ok, @user }
       end
     end
   end
