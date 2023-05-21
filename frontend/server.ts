@@ -1,6 +1,6 @@
+import { Deferred, deferred } from "std/async/deferred.ts";
 import { Handler, serve } from "std/http/server.ts";
 import * as path from "std/path/mod.ts";
-import { Deferred, deferred } from "std/async/deferred.ts";
 
 import * as eta from "eta";
 
