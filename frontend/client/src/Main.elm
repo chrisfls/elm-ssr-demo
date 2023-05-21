@@ -6,7 +6,7 @@ import Browser.Navigation as Navigation
 import Url exposing (Url)
 
 
-main : Program () App.Model App.Msg
+main : Program App.Flags App.Model App.Msg
 main =
     Browser.application
         { init = init
@@ -18,7 +18,7 @@ main =
         }
 
 
-init : () -> Url -> Navigation.Key -> ( App.Model, Cmd App.Msg )
+init : App.Flags -> Url -> Navigation.Key -> ( App.Model, Cmd App.Msg )
 init flags _ _ =
     App.init flags
 
