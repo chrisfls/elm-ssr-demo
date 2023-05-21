@@ -11,6 +11,7 @@ export interface Options {
   publicDir?: string;
   server?: string;
   client?: string;
+  inject?: string;
   timeout?: number;
 }
 
@@ -70,6 +71,7 @@ export async function createHandler(options?: Options): Promise<Handler> {
   const server = options?.server ?? "ssr.js";
   const client = options?.client ?? await find(publicDir);
   const timeout = options?.timeout ?? 10000;
+  const inject = options?.inject;
   const config = eta.configure({
     views: path.join(Deno.cwd(), web),
   });
@@ -101,6 +103,7 @@ export async function createHandler(options?: Options): Promise<Handler> {
 
     return new Response(
       await eta.renderFileAsync("index", {
+        inject,
         client,
         view,
         flags: JSON.stringify(model),

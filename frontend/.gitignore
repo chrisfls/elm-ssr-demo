@@ -1,4 +1,5 @@
 .direnv
+*.js
 *elm-graphql-metadata.json
 elm-stuff
 node_modules
