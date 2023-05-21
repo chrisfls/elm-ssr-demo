@@ -2,9 +2,11 @@ import { ConnInfo, serve } from "std/http/server.ts";
 import { serveDir, serveFile } from "std/http/file_server.ts";
 import * as fs from "std/fs/mod.ts";
 
-import { createHandler } from "./server.ts";
-import { make } from "./elm.ts";
 import { refresh } from "refresh/mod.ts";
+
+import { createHandler } from "./server.ts";
+import { load } from "./app.ts";
+import { make } from "./elm.ts";
 
 const publicDir = "public";
 const hotswap = "hotswap.js";
@@ -13,7 +15,7 @@ const tmp = async () => `${await Deno.makeTempFile()}.js`;
 const client = await tmp();
 const server = await tmp();
 
-const live = refresh();
+const refresher = refresh();
 
 const ssr = await createHandler({
   publicDir,
@@ -38,7 +40,7 @@ async function handler(
   request: Request,
   connInfo: ConnInfo,
 ): Promise<Response> {
-  const response = live(request);
+  const response = refresher(request);
   if (response) return response;
 
   const url = new URL(request.url);
@@ -71,6 +73,8 @@ async function handler(
     output: server,
     deno: true,
   });
+
+  await load(server);
 
   return await ssr(request, connInfo);
 }

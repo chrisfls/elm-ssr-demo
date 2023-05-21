@@ -17,7 +17,7 @@ export interface Options {
 
 const empty = [] as unknown as RegExpMatchArray[number];
 
-export async function find(
+async function find(
   directory: string,
 ): Promise<string | undefined> {
   let highest = 0;
@@ -64,7 +64,7 @@ function createRegistry() {
       });
       promises.delete(id);
     },
-    resolve(message: HtmlPort) {
+    render(message: HtmlPort) {
       promises.get(message.id)?.resolve(message);
       promises.delete(message.id);
     },
@@ -105,7 +105,7 @@ export async function createHandler(options?: Options): Promise<Handler> {
   const app = (await load(server)).Main.init({ flags: {} });
   const registry = createRegistry();
 
-  app.ports.htmlPort.subscribe(registry.resolve);
+  app.ports.htmlPort.subscribe(registry.render);
   app.ports.errorPort.subscribe(registry.error);
 
   return async function handler(request) {
