@@ -26,8 +26,8 @@ empty =
 
 
 insert : Int -> String -> Headers -> Apps -> ( Apps, Action )
-insert id _ _ (Apps dict) =
-    ready id dict (App.init { model = Encode.null })
+insert id url headers (Apps dict) =
+    ready id dict (App.init { model = Encode.null, url = Just url, headers = Just headers })
 
 
 remove : Int -> Apps -> Apps

@@ -3,6 +3,7 @@ module App exposing (Flags, Model, Msg(..), encoder, init, ready, subscriptions,
 import Dual.Html exposing (..)
 import Dual.Html.Attributes exposing (..)
 import Dual.Html.Events exposing (onInput)
+import Headers exposing (Headers)
 import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Encode as Encode
 
@@ -15,11 +16,18 @@ type alias Model =
     { name : String
     , password : String
     , passwordAgain : String
+    , headers : Headers
     }
 
 
+
+-- TODO: Unionize as
+--          | Init { url: string, headers : Headers }
+--          | Cont Value
+
+
 type alias Flags =
-    { model : Value }
+    { model : Value, url : Maybe String, headers : Maybe Headers }
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -29,24 +37,25 @@ init flags =
             ( model, Cmd.none )
 
         Ok Nothing ->
-            ( empty, Cmd.none )
+            ( empty flags.headers, Cmd.none )
 
         Err _ ->
             -- TODO: report error through a log port
-            ( empty, Cmd.none )
+            ( empty flags.headers, Cmd.none )
 
 
-empty : Model
-empty =
-    Model "" "" ""
+empty : Maybe Headers -> Model
+empty headers =
+    Model "" "" "" (Maybe.withDefault Headers.empty headers)
 
 
 decoder : Decoder (Maybe Model)
 decoder =
-    Decode.map3 Model
+    Decode.map4 Model
         (Decode.field "name" Decode.string)
         (Decode.field "password" Decode.string)
         (Decode.field "passwordAgain" Decode.string)
+        (Decode.field "headers" Headers.decoder)
         |> Decode.nullable
 
 
@@ -56,6 +65,7 @@ encoder model =
         [ ( "name", Encode.string model.name )
         , ( "password", Encode.string model.password )
         , ( "passwordAgain", Encode.string model.passwordAgain )
+        , ( "headers", Headers.encoder model.headers )
         ]
 
 
