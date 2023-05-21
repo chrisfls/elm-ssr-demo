@@ -12,20 +12,14 @@ export interface Subscription<Message> {
 export interface HttpPort {
   id: number;
   url: string;
-  headers: { [key: string]: string };
+  headers: { [key: string]: string[] };
 }
 
 export interface TimeoutPort {
   id: number;
-  type: "abort";
 }
 
 export interface HtmlPort {
-  id: number;
-  value: string;
-}
-
-export interface ErrorPort {
   id: number;
   value: string;
 }
@@ -34,7 +28,6 @@ export interface Ports {
   http: Send<HttpPort>;
   timeout: Send<TimeoutPort>;
   html: Subscription<HtmlPort>;
-  error: Subscription<ErrorPort>;
 }
 
 export interface App {

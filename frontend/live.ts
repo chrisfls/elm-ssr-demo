@@ -1,4 +1,5 @@
-import { serve } from "std/http/server.ts";
+import { ConnInfo, serve } from "std/http/server.ts";
+import { serveDir, serveFile } from "std/http/file_server.ts";
 
 import { make } from "./elm.ts";
 import { createHandler } from "./server.ts";
@@ -21,4 +22,30 @@ await make("src/Main.elm", {
   deno: true,
 });
 
-await serve(await createHandler({ client, server }));
+const publicDir = "public";
+const publicUrl = "/public/";
+
+const ssr = await createHandler({ publicDir, server, client: "bundle.js" });
+
+async function handler(
+  request: Request,
+  connInfo: ConnInfo,
+): Promise<Response> {
+  const url = new URL(request.url);
+
+  if (url.pathname === "/favicon.ico") {
+    return serveDir(request, { fsRoot: publicDir });
+  }
+
+  if (url.pathname.startsWith(publicUrl)) {
+    return serveDir(request, { fsRoot: publicDir, urlRoot: publicDir });
+  }
+
+  if (url.pathname === "/bundle.js") {
+    return serveFile(request, client);
+  }
+
+  return await ssr(request, connInfo);
+}
+
+await serve(handler);
