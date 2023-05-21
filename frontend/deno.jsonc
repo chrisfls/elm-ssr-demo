@@ -6,7 +6,8 @@
   },
   "tasks": {
     "fmt": "elm-format .",
-    "dev": "deno run -A --watch live.ts"
+    "dev": "deno run -A --watch live.ts",
+    "api": "pnpm run api"
     // "dev:build": "export ENV=production && deno task build",
     // "build": "deno task build:client && deno task build:server",
     // "build:client": "deno run -A scripts/elm.ts --in client/Main.elm --out public/bundle.js --cwd app",

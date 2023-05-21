@@ -5,7 +5,7 @@ defmodule AppWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/graphql" do
+  scope "/api" do
     pipe_through :graphql
     forward "/", Absinthe.Plug, schema: AppWeb.Schema
   end
