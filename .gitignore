@@ -31,6 +31,8 @@ app-*.tar
 # vscode settings
 .vscode
 
+data
+
 # elm-package generated files
 elm-stuff
 
