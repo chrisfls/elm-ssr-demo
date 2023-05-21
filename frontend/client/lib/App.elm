@@ -1,4 +1,4 @@
-module App exposing (Flags, Model, Msg(..), encoder, init, ready, subscriptions, title, update, view)
+module App exposing (Model, Msg(..), decoder, encoder, init, ready, reuse, subscriptions, title, update, view)
 
 import Dual.Html exposing (..)
 import Dual.Html.Attributes exposing (..)
@@ -25,33 +25,9 @@ type alias Model =
     }
 
 
-
--- TODO: Unionize as
---          | Init { url: string, headers : Headers }
---          | Cont Value
-
-
-type alias Flags =
-    { model : Value, url : Maybe String, headers : Maybe Headers }
-
-
-init : Flags -> ( Model, Cmd Msg )
-init flags =
-    case Decode.decodeValue decoder flags.model of
-        Ok (Just model) ->
-            ( model, Cmd.none )
-
-        Ok Nothing ->
-            load flags.headers
-
-        Err _ ->
-            -- TODO: report error through a log port
-            load flags.headers
-
-
-load : Maybe Headers -> ( Model, Cmd Msg )
-load headers =
-    ( empty (Maybe.withDefault Headers.empty headers)
+init : String -> Headers -> ( Model, Cmd Msg )
+init _ headers =
+    ( empty headers
     , requestQuery Loaded User.query
     )
 
@@ -66,7 +42,12 @@ empty headers =
     }
 
 
-decoder : Decoder (Maybe Model)
+reuse : Model -> ( Model, Cmd Msg )
+reuse model =
+    ( model, Cmd.none )
+
+
+decoder : Decoder Model
 decoder =
     Decode.map5 Model
         (Decode.field "name" Decode.string)
@@ -74,7 +55,6 @@ decoder =
         (Decode.field "passwordAgain" Decode.string)
         (Decode.field "loaded" Decode.bool)
         (Decode.field "headers" Headers.decoder)
-        |> Decode.nullable
 
 
 encoder : Model -> Value

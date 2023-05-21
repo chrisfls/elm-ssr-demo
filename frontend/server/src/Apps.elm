@@ -4,7 +4,7 @@ import App
 import Headers exposing (Headers)
 import Html.String
 import IntDict exposing (IntDict)
-import Json.Encode as Encode exposing (Value)
+import Json.Encode exposing (Value)
 
 
 type Apps
@@ -27,7 +27,7 @@ empty =
 
 insert : Int -> String -> Headers -> Apps -> ( Apps, Action )
 insert id url headers (Apps dict) =
-    ready id dict (App.init { model = Encode.null, url = Just url, headers = Just headers })
+    ready id dict (App.init url headers)
 
 
 remove : Int -> Apps -> Apps
