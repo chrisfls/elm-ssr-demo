@@ -48,5 +48,5 @@ export interface Elm {
 
 export async function load(filePath: string): Promise<Elm> {
   await import(filePath);
-  return globalThis as unknown as Elm;
+  return (globalThis as unknown as { Elm: Elm })["Elm"];
 }
