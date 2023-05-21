@@ -1,31 +1,44 @@
 import { ConnInfo, serve } from "std/http/server.ts";
 import { serveDir, serveFile } from "std/http/file_server.ts";
+import * as fs from "std/fs/mod.ts";
 
-import { script } from "./hotswap.ts";
 import { createHandler } from "./server.ts";
 import { make } from "./elm.ts";
 import { refresh } from "refresh/mod.ts";
 
 const publicDir = "public";
+const hotswap = "hotswap.js";
 
 const tmp = async () => `${await Deno.makeTempFile()}.js`;
 const client = await tmp();
 const server = await tmp();
 
-const hotswap = refresh();
+const live = refresh();
 
 const ssr = await createHandler({
   publicDir,
   server,
-  inject: script,
+  inject: hotswap,
   client: "bundle.js",
 });
+
+if (!await fs.exists(hotswap)) {
+  const json = await Deno.readTextFile("./deno.jsonc");
+  const deno: { imports: Record<string, string> } = eval(`(${json})`);
+  const ns = deno.imports["refresh/"];
+  if (ns === undefined) throw new Error("No import map found for 'refresh/'.");
+
+  const response = await fetch(`${ns}client.js`);
+  const content = await response.text();
+
+  await Deno.writeTextFile(hotswap, content);
+}
 
 async function handler(
   request: Request,
   connInfo: ConnInfo,
 ): Promise<Response> {
-  const response = hotswap(request);
+  const response = live(request);
   if (response) return response;
 
   const url = new URL(request.url);
@@ -34,8 +47,8 @@ async function handler(
     return serveDir(request, { fsRoot: publicDir });
   }
 
-  if (url.pathname === `/${script}`) {
-    return serveFile(request, script);
+  if (url.pathname === `/${hotswap}`) {
+    return serveFile(request, hotswap);
   }
 
   if (url.pathname.startsWith(`/${publicDir}/`)) {

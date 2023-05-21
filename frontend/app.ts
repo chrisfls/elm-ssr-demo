@@ -1,6 +1,8 @@
 /// <reference lib="dom" />
 
-import "./shim.ts";
+import XMLHttpRequest from "xhr-shim";
+
+globalThis["XMLHttpRequest"] = XMLHttpRequest;
 
 export interface Send<Message> {
   send(message: Message): void;
