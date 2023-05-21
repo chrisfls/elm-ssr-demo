@@ -72,9 +72,9 @@ perform id model ( apps, action ) =
             , Cmd.map (Msg id) cmd
             )
 
-        Apps.Html html ->
+        Apps.View view appModel ->
             ( { model | apps = apps }
-            , Ports.html id html
+            , Ports.html id view appModel
             )
 
 

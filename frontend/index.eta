@@ -10,7 +10,10 @@
     <div id="main"><%~ it.html %></div>
     <script src="<%~ it.client %>"></script>
     <script>
-      var app = Elm.Main.init({ node: document.getElementById("main") });
+      var app = Elm.Main.init({
+        node: document.getElementById("main"),
+        flags: { model: <%~ it.model %> }
+      });
     </script>
   </body>
 </html>

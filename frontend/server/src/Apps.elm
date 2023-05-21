@@ -4,6 +4,7 @@ import App
 import Headers exposing (Headers)
 import Html.String
 import IntDict exposing (IntDict)
+import Json.Encode as Encode exposing (Value)
 
 
 type Apps
@@ -16,7 +17,7 @@ type alias Internal =
 
 type Action
     = Perform (Cmd App.Msg)
-    | Html String
+    | View String Value
 
 
 empty : Apps
@@ -26,7 +27,7 @@ empty =
 
 insert : Int -> String -> Headers -> Apps -> ( Apps, Action )
 insert id _ _ (Apps dict) =
-    ready id dict (App.init {})
+    ready id dict (App.init { model = Encode.null })
 
 
 remove : Int -> Apps -> Apps
@@ -50,7 +51,7 @@ ready : Int -> IntDict App.Model -> ( App.Model, Cmd App.Msg ) -> ( Apps, Action
 ready id dict ( model, cmd ) =
     if App.ready model then
         ( Apps (IntDict.remove id dict)
-        , Html (Html.String.toString 0 (App.view model))
+        , View (Html.String.toString 0 (App.view model)) (App.encoder model)
         )
 
     else

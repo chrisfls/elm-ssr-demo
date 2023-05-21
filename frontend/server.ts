@@ -32,7 +32,7 @@ function parseHeaders(requestHeaders: Headers): HttpPort["headers"] {
 
 function createRegistry() {
   let index = 0;
-  const promises = new Map<number, Deferred<string>>();
+  const promises = new Map<number, Deferred<HtmlPort>>();
 
   return {
     error({ id, reason }: ErrorPort) {
@@ -42,13 +42,13 @@ function createRegistry() {
       });
       promises.delete(id);
     },
-    resolve({ id, value }: HtmlPort) {
-      promises.get(id)?.resolve(value);
-      promises.delete(id);
+    resolve(message: HtmlPort) {
+      promises.get(message.id)?.resolve(message);
+      promises.delete(message.id);
     },
     defer(app: App) {
       const id = ++index;
-      const defer = deferred<string>();
+      const defer = deferred<HtmlPort>();
 
       promises.set(id, defer);
 
@@ -96,12 +96,16 @@ export async function createHandler(options?: Options): Promise<Handler> {
     });
 
     const timer = setTimeout(cancel, timeout);
-    const html = await defer;
+    const { view, model } = await defer;
 
     clearTimeout(timer);
 
     return new Response(
-      await eta.renderFileAsync("index", { client, html }, config),
+      await eta.renderFileAsync("index", {
+        client,
+        view,
+        model: JSON.stringify(model),
+      }, config),
       {
         status: 200,
         headers: { "content-type": "text/html" },

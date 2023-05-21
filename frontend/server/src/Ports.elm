@@ -9,12 +9,12 @@ import Json.Encode as Encode
 -- COMMANDS
 
 
-port htmlPort : { id : Int, value : String } -> Cmd msg
+port htmlPort : { id : Int, view : String, model : Value } -> Cmd msg
 
 
-html : Int -> String -> Cmd msg
-html id value =
-    htmlPort { id = id, value = value }
+html : Int -> String -> Value -> Cmd msg
+html id view model =
+    htmlPort { id = id, view = view, model = model }
 
 
 port errorPort : Value -> Cmd msg
