@@ -5,6 +5,9 @@ export interface Options {
   /** Change the location that elm is run. */
   cwd?: string;
 
+  /** Replace (this) with (globalThis). */
+  deno?: boolean;
+
   /** Turn on the time-travelling debugger. */
   debug?: boolean;
 
@@ -21,7 +24,23 @@ export interface Options {
   docs?: string;
 }
 
+async function deno(filePath: string) {
+  return await Deno.writeTextFile(
+    filePath,
+    (await Deno.readTextFile(filePath)).replace(
+      /\(this\)\)\;$/g,
+      "(globalThis));",
+    ),
+  );
+}
+
 export async function make(input: string, options?: Options) {
+  if (options?.deno && !options?.output) {
+    throw new Error(
+      "Cannot compile for Deno without specifying a JavaScript output.",
+    );
+  }
+
   const cmd = [
     options?.elm ?? "elm",
     "make",
@@ -43,5 +62,11 @@ export async function make(input: string, options?: Options) {
     stdout: "inherit",
   });
 
-  return await process.status();
+  const status = await process.status();
+
+  if (status.success && options?.deno && options?.output) {
+    await deno(options.output);
+  }
+
+  return status;
 }
