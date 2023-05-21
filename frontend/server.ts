@@ -58,7 +58,7 @@ function createRegistry() {
 }
 
 export async function createHandler(options?: Options): Promise<Handler> {
-  const web = options?.web ?? "web";
+  const web = options?.web ?? ".";
   const publicDir = options?.publicDir ?? "public";
   const server = options?.server ?? "ssr.js";
   const client = options?.client ?? await find(publicDir);
