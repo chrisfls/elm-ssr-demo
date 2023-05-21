@@ -98,8 +98,6 @@ export async function createHandler(options?: Options): Promise<Handler> {
 
     clearTimeout(timer);
 
-    console.log(html)
-
     return new Response(
       await eta.renderFileAsync("index", { client, html }, config),
       {
