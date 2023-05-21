@@ -1,3 +1,4 @@
+# TODO: run the whole app from here
 version: '3'
 services:
   backend:
