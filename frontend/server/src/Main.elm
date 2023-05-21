@@ -1,20 +1,12 @@
-port module Main exposing (Model, Msg(..), init, main, update)
+module Main exposing (Model, Msg(..), init, main, update)
 
 import App
+import Apps exposing (Apps)
+import Headers exposing (Headers)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.String
-import IntDict exposing (IntDict)
-import Json.Decode exposing (Value)
-
-
-port http : ({ id : Int, url : String, headers : Value } -> msg) -> Sub msg
-
-
-port timeout : ({ id : Int } -> msg) -> Sub msg
-
-
-port html : { id : Int, html : String } -> Cmd msg
+import Json.Decode as Decode
+import Ports
 
 
 
@@ -23,7 +15,7 @@ port html : { id : Int, html : String } -> Cmd msg
 
 main : Program () Model Msg
 main =
-    Platform.worker { init = init, update = update, subscriptions = subscriptions }
+    Platform.worker { init = init, update = update, subscriptions = always subscriptions }
 
 
 
@@ -31,12 +23,12 @@ main =
 
 
 type alias Model =
-    IntDict App.Model
+    { apps : Apps }
 
 
 init : () -> ( Model, Cmd Msg )
 init () =
-    ( IntDict.empty
+    ( { apps = Apps.empty }
     , Cmd.none
     )
 
@@ -46,50 +38,49 @@ init () =
 
 
 type Msg
-    = Http { id : Int, url : String, headers : Value }
-    | Timeout { id : Int }
+    = Http Int String Headers
+    | Error Int Decode.Error
+    | Timeout Int
     | Msg Int App.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Http { id } ->
-            updateApp id model (App.init ())
+        Http id url headers ->
+            perform id model (Apps.insert id url headers model.apps)
 
-        Timeout { id } ->
-            ( IntDict.remove id model
+        Error id error ->
+            ( { model | apps = Apps.remove id model.apps }
+            , Ports.error id error
+            )
+
+        Timeout id ->
+            ( { model | apps = Apps.remove id model.apps }
             , Cmd.none
             )
 
         Msg id appMsg ->
-            case IntDict.get id model of
-                Just app ->
-                    updateApp id model (App.update appMsg app)
-
-                Nothing ->
-                    ( model, Cmd.none )
+            perform id model (Apps.update id appMsg model.apps)
 
 
-updateApp : Int -> IntDict App.Model -> ( App.Model, Cmd App.Msg ) -> ( IntDict App.Model, Cmd Msg )
-updateApp id model ( app, cmd ) =
-    if App.ready app then
-        ( IntDict.remove id model
-        , html
-            { id = id
-            , html = Html.String.toString 0 (App.view app)
-            }
-        )
+perform : Int -> Model -> ( Apps, Apps.Action ) -> ( Model, Cmd Msg )
+perform id model ( apps, action ) =
+    case action of
+        Apps.Perform cmd ->
+            ( { model | apps = apps }
+            , Cmd.map (Msg id) cmd
+            )
 
-    else
-        ( IntDict.insert id app model
-        , Cmd.map (Msg id) cmd
-        )
+        Apps.Html html ->
+            ( { model | apps = apps }
+            , Ports.html id html
+            )
 
 
-subscriptions : Model -> Sub Msg
-subscriptions _ =
+subscriptions : Sub Msg
+subscriptions =
     Sub.batch
-        [ http Http
-        , timeout Timeout
+        [ Ports.http { onSuccess = Http, onError = Error }
+        , Ports.timeout Timeout
         ]

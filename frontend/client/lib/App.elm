@@ -1,4 +1,4 @@
-module App exposing (Model, Msg(..), init, ready, subscriptions, title, update, view)
+module App exposing (Flags, Model, Msg(..), init, ready, subscriptions, title, update, view)
 
 import Dual.Html exposing (..)
 import Dual.Html.Attributes exposing (..)
@@ -16,8 +16,12 @@ type alias Model =
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init () =
+type alias Flags =
+    {}
+
+
+init : Flags -> ( Model, Cmd Msg )
+init _ =
     ( Model "" "" "", Cmd.none )
 
 
