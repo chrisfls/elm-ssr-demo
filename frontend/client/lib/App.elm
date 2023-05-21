@@ -1,8 +1,10 @@
-module App exposing (Flags, Model, Msg(..), init, ready, subscriptions, title, update, view)
+module App exposing (Flags, Model, Msg(..), encoder, init, ready, subscriptions, title, update, view)
 
 import Dual.Html exposing (..)
 import Dual.Html.Attributes exposing (..)
 import Dual.Html.Events exposing (onInput)
+import Json.Decode as Decode exposing (Decoder, Value)
+import Json.Encode as Encode
 
 
 
@@ -17,12 +19,44 @@ type alias Model =
 
 
 type alias Flags =
-    {}
+    { model : Value }
 
 
 init : Flags -> ( Model, Cmd Msg )
-init _ =
-    ( Model "" "" "", Cmd.none )
+init flags =
+    case Decode.decodeValue decoder flags.model of
+        Ok (Just model) ->
+            ( model, Cmd.none )
+
+        Ok Nothing ->
+            ( empty, Cmd.none )
+
+        Err _ ->
+            -- TODO: report error through a log port
+            ( empty, Cmd.none )
+
+
+empty : Model
+empty =
+    Model "" "" ""
+
+
+decoder : Decoder (Maybe Model)
+decoder =
+    Decode.map3 Model
+        (Decode.field "name" Decode.string)
+        (Decode.field "password" Decode.string)
+        (Decode.field "passwordAgain" Decode.string)
+        |> Decode.nullable
+
+
+encoder : Model -> Value
+encoder model =
+    Encode.object
+        [ ( "name", Encode.string model.name )
+        , ( "password", Encode.string model.password )
+        , ( "passwordAgain", Encode.string model.passwordAgain )
+        ]
 
 
 
