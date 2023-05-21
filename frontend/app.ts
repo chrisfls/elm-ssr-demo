@@ -31,9 +31,9 @@ export interface HtmlPort {
 
 export interface Ports {
   httpPort: Send<HttpPort>;
-  errorPort: Send<ErrorPort>;
   timeoutPort: Send<TimeoutPort>;
   htmlPort: Subscription<HtmlPort>;
+  errorPort: Subscription<ErrorPort>;
 }
 
 export interface App {

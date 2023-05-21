@@ -4,7 +4,7 @@ import { Deferred, deferred } from "std/async/deferred.ts";
 
 import * as eta from "eta";
 
-import { HtmlPort, HttpPort, load } from "./app.ts";
+import { App, ErrorPort, HtmlPort, HttpPort, load } from "./app.ts";
 import { find } from "./client.ts";
 
 export interface Options {
@@ -35,11 +35,18 @@ function createRegistry() {
   const promises = new Map<number, Deferred<string>>();
 
   return {
+    error({ id, reason }: ErrorPort) {
+      promises.get(id)?.reject({
+        type: "error",
+        reason,
+      });
+      promises.delete(id);
+    },
     resolve({ id, value }: HtmlPort) {
       promises.get(id)?.resolve(value);
       promises.delete(id);
     },
-    defer() {
+    defer(app: App) {
       const id = ++index;
       const defer = deferred<string>();
 
@@ -48,9 +55,10 @@ function createRegistry() {
       return {
         id,
         defer,
-        abort(reason?: unknown) {
+        timeout() {
+          app.ports.timeoutPort.send({ id });
           promises.delete(id);
-          defer.reject(reason);
+          defer.reject({ type: "timeout" });
         },
       };
     },
@@ -75,10 +83,11 @@ export async function createHandler(options?: Options): Promise<Handler> {
   const registry = createRegistry();
 
   app.ports.htmlPort.subscribe(registry.resolve);
+  app.ports.errorPort.subscribe(registry.error);
 
   return async function handler(request) {
     const url = new URL(request.url);
-    const { id, defer, abort } = registry.defer();
+    const { id, defer, timeout: cancel } = registry.defer(app);
 
     app.ports.httpPort.send({
       id,
@@ -86,14 +95,7 @@ export async function createHandler(options?: Options): Promise<Handler> {
       headers: parseHeaders(request.headers),
     });
 
-    const timer = setTimeout(
-      () => {
-        app.ports.timeoutPort.send({ id });
-        abort(new Error("Operation timed out"));
-      },
-      timeout,
-    );
-
+    const timer = setTimeout(cancel, timeout);
     const html = await defer;
 
     clearTimeout(timer);
