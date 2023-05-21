@@ -5,9 +5,13 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.String
 import IntDict exposing (IntDict)
+import Json.Decode exposing (Value)
 
 
-port http : ({ id : Int, url : String } -> msg) -> Sub msg
+port http : ({ id : Int, url : String, headers : Value } -> msg) -> Sub msg
+
+
+port timeout : ({ id : Int } -> msg) -> Sub msg
 
 
 port html : { id : Int, html : String } -> Cmd msg
@@ -42,15 +46,19 @@ init () =
 
 
 type Msg
-    = Request { id : Int, url : String }
+    = Http { id : Int, url : String, headers : Value }
+    | Timeout { id : Int }
     | Forward Int App.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Request { id } ->
+        Http { id } ->
             updateApp id model (App.init ())
+
+        Timeout { id } ->
+            ( model, Cmd.none )
 
         Forward id forward ->
             case IntDict.get id model of
@@ -79,4 +87,7 @@ updateApp id model ( app, cmd ) =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    http Request
+    Sub.batch
+        [ http Http
+        , timeout Timeout
+        ]
