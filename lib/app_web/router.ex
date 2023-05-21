@@ -1,12 +1,13 @@
 defmodule AppWeb.Router do
   use AppWeb, :router
 
-  pipeline :api do
+  pipeline :graphql do
     plug :accepts, ["json"]
   end
 
-  scope "/api", AppWeb do
-    pipe_through :api
+  scope "/graphql" do
+    pipe_through :graphql
+    forward "/", Absinthe.Plug, schema: AppWeb.Schema
   end
 
   if Mix.env == :dev do
