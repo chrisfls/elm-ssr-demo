@@ -35,8 +35,8 @@ function createRegistry() {
   const promises = new Map<number, Deferred<string>>();
 
   return {
-    resolve({ id, value }: HtmlPort) {
-      promises.get(id)?.resolve(value);
+    resolve({ id, html }: HtmlPort) {
+      promises.get(id)?.resolve(html);
       promises.delete(id);
     },
     defer() {
@@ -97,6 +97,8 @@ export async function createHandler(options?: Options): Promise<Handler> {
     const html = await defer;
 
     clearTimeout(timer);
+
+    console.log(html)
 
     return new Response(
       await eta.renderFileAsync("index", { client, html }, config),

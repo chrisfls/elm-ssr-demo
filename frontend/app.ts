@@ -21,7 +21,7 @@ export interface TimeoutPort {
 
 export interface HtmlPort {
   id: number;
-  value: string;
+  html: string;
 }
 
 export interface Ports {
