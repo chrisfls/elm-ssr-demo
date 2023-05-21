@@ -25,13 +25,13 @@ type Ports = {
   html: elm.PortWithSubscription<HtmlMsg>;
 };
 
-const STATIC_DIR = "static";
-const STATIC_URL = `/${STATIC_DIR}/`;
+const PUBLIC_DIR = "public";
+const PUBLIC_URL = `/${PUBLIC_DIR}/`;
 
 const SERVER_ELM = "web/bundle.js";
 const CLIENT_ELM = env.development
   ? "bundle.js"
-  : await findLastBundle(STATIC_DIR);
+  : await findLastBundle(PUBLIC_DIR);
 const CLIENT_ROOT = path.join(Deno.cwd(), "app");
 
 if (!await fs.exists(SERVER_ELM)) {
@@ -62,16 +62,16 @@ export async function handler(request: Request): Promise<Response> {
   const url = new URL(request.url);
 
   if (url.pathname === "/favicon.ico") {
-    return serveDir(request, { fsRoot: STATIC_DIR });
+    return serveDir(request, { fsRoot: PUBLIC_DIR });
   }
 
-  if (url.pathname.startsWith(STATIC_URL)) {
-    return serveDir(request, { fsRoot: STATIC_DIR, urlRoot: STATIC_DIR });
+  if (url.pathname.startsWith(PUBLIC_URL)) {
+    return serveDir(request, { fsRoot: PUBLIC_DIR, urlRoot: PUBLIC_DIR });
   }
 
   if (env.development && url.pathname === "/bundle.js") {
     return new Response(
-      await elm.compileString("client/Main.elm", "../static/bundle.js", {
+      await elm.compileString("client/Main.elm", "../public/bundle.js", {
         cwd: CLIENT_ROOT,
       }),
       {
