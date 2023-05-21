@@ -1,5 +1,7 @@
 /// <reference lib="dom" />
 
+import "./shim.ts";
+
 export interface Send<Message> {
   send(message: Message): void;
 }
