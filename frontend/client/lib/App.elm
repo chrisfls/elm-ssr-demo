@@ -162,5 +162,5 @@ requestQuery :
     -> SelectionSet decodesTo RootQuery
     -> Cmd msg
 requestQuery msg =
-    Graphql.Http.queryRequest "http://localhost:4000"
+    Graphql.Http.queryRequest "http://localhost:4000/api"
         >> Graphql.Http.send msg

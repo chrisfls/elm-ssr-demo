@@ -1,8 +1,8 @@
 {
   "imports": {
     "std/": "https://deno.land/std@0.188.0/",
-    "node-elm-compiler": "https://esm.sh/node-elm-compiler@5.0.6",
-    "eta": "https://deno.land/x/eta@v2.1.0/mod.ts"
+    "eta": "https://deno.land/x/eta@v2.1.0/mod.ts",
+    "xhr-shim": "https://esm.sh/xhr-shim@0.1.3"
   },
   "tasks": {
     "fmt": "elm-format .",

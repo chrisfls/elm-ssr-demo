@@ -69,6 +69,8 @@
     "https://deno.land/x/eta@v2.1.0/polyfills.ts": "048f697fdf0ef002cc59cf7a69cf370e11877c3b7f9c0b68dd84ab4762e0ffdc",
     "https://deno.land/x/eta@v2.1.0/render.ts": "c6bdc538cb9c2ffc1593ac7ce0fd55c711a65cd6a909b097c913ea47056badb4",
     "https://deno.land/x/eta@v2.1.0/storage.ts": "46f762d1c04d9095ed6fb694c0d993e9ae507a69bab469a5a3bd23a5a9a79983",
-    "https://deno.land/x/eta@v2.1.0/utils.ts": "e30a240bded14fde639287c8fb1f826c86c22c50264f4c69a266100307c381a9"
+    "https://deno.land/x/eta@v2.1.0/utils.ts": "e30a240bded14fde639287c8fb1f826c86c22c50264f4c69a266100307c381a9",
+    "https://esm.sh/v122/xhr-shim@0.1.3/deno/xhr-shim.mjs": "ef13fc6b575028bc8d3d90d45608fb8280519f5599dc741c49e87fd5e161648d",
+    "https://esm.sh/xhr-shim@0.1.3": "967aa0017707506def72852aa7b57b005cbc9ad938f8da541db0c35c352a0d78"
   }
 }

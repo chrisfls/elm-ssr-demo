@@ -2,7 +2,10 @@ import { Handler, serve } from "std/http/server.ts";
 import * as path from "std/path/mod.ts";
 import { Deferred, deferred } from "std/async/deferred.ts";
 
+import XMLHttpRequest from "xhr-shim";
 import * as eta from "eta";
+
+globalThis["XMLHttpRequest"] = XMLHttpRequest;
 
 import { App, ErrorPort, HtmlPort, HttpPort, load } from "./app.ts";
 import { find } from "./client.ts";
@@ -104,7 +107,7 @@ export async function createHandler(options?: Options): Promise<Handler> {
       await eta.renderFileAsync("index", {
         client,
         view,
-        model: JSON.stringify(model),
+        flags: JSON.stringify(model),
       }, config),
       {
         status: 200,
