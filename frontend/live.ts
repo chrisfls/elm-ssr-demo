@@ -20,7 +20,7 @@ const refresher = refresh();
 const ssr = await createHandler({
   publicDir,
   server,
-  inject: hotswap,
+  extra: hotswap,
   client: "bundle.js",
 });
 

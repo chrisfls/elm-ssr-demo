@@ -4,18 +4,24 @@ import * as path from "std/path/mod.ts";
 
 import * as eta from "eta";
 
-import { App, ErrorPort, HtmlPort, HttpPort, load } from "./app.ts";
+import * as elm from "./app.ts";
 
 export interface Options {
-  web?: string;
+  /** Path for public assets. */
   publicDir?: string;
-  server?: string;
-  client?: string;
-  inject?: string;
-  timeout?: number;
-}
 
-const empty = [] as unknown as RegExpMatchArray[number];
+  /** Path to server js. */
+  server?: string;
+
+  /** Path to client js. */
+  client?: string;
+
+  /** Timeout for rendering. */
+  timeout?: number;
+
+  /** Extra script to inject (used by hotswap) */
+  extra?: string;
+}
 
 async function find(
   directory: string,
@@ -25,9 +31,15 @@ async function find(
 
   for await (const entry of Deno.readDir(directory)) {
     if (!entry.isFile) continue;
-    const match = (entry.name.match(/^bundle\.(\d+)\.js$/) ?? empty)[1];
+
+    const matches = entry.name.match(/^bundle\.(\d+)\.js$/)
+    if (matches == null) continue;
+
+    const match = matches[1];
     if (match === undefined) continue;
+
     const timestamp = parseInt(match);
+
     if (timestamp > highest) {
       highest = timestamp;
       filename = entry.name;
@@ -37,8 +49,34 @@ async function find(
   if (filename) return path.join(directory, filename);
 }
 
-function parseHeaders(requestHeaders: Headers): HttpPort["headers"] {
-  const headers: HttpPort["headers"] = {};
+class Defer<T> {
+  #index = 0;
+  #promises = new Map<number, Deferred<T>>();
+
+  constructor() {}
+
+  get() {
+    const id = ++this.#index;
+    const promise = deferred<T>();
+    this.#promises.set(id, promise);
+    return { id, promise };
+  }
+
+  resolve(id: number, message: T) {
+    const promise = this.#promises.get(id);
+    this.#promises.delete(id);
+    promise?.resolve(message);
+  }
+
+  reject(id: number, reason: unknown) {
+    const promise = this.#promises.get(id);
+    this.#promises.delete(id);
+    promise?.reject(reason);
+  }
+}
+
+function encode(requestHeaders: Headers): elm.HttpPort["headers"] {
+  const headers: elm.HttpPort["headers"] = {};
 
   requestHeaders.forEach((value, key) => {
     const array = headers[key];
@@ -52,80 +90,47 @@ function parseHeaders(requestHeaders: Headers): HttpPort["headers"] {
   return headers;
 }
 
-function createRegistry() {
-  let index = 0;
-  const promises = new Map<number, Deferred<HtmlPort>>();
-
-  return {
-    error({ id, reason }: ErrorPort) {
-      promises.get(id)?.reject({
-        type: "error",
-        reason,
-      });
-      promises.delete(id);
-    },
-    render(message: HtmlPort) {
-      promises.get(message.id)?.resolve(message);
-      promises.delete(message.id);
-    },
-    defer(app: App) {
-      const id = ++index;
-      const defer = deferred<HtmlPort>();
-
-      promises.set(id, defer);
-
-      return {
-        id,
-        defer,
-        timeout() {
-          app.ports.timeoutPort.send({ id });
-          promises.delete(id);
-          defer.reject({ type: "timeout" });
-        },
-      };
-    },
-  };
-}
-
 export async function createHandler(options?: Options): Promise<Handler> {
-  const web = options?.web ?? ".";
   const publicDir = options?.publicDir ?? "public";
   const server = options?.server ?? "ssr.js";
   const client = options?.client ?? await find(publicDir);
   const timeout = options?.timeout ?? 10000;
-  const inject = options?.inject;
-  const config = eta.configure({
-    views: path.join(Deno.cwd(), web),
-  });
+  const extra = options?.extra;
 
   if (client === undefined) {
     throw new Error("client is undefined");
   }
 
-  const app = (await load(server)).Main.init({ flags: {} });
-  const registry = createRegistry();
+  const config = eta.configure({ views: Deno.cwd() });
+  const defer = new Defer<elm.HtmlPort>();
 
-  app.ports.htmlPort.subscribe(registry.render);
-  app.ports.errorPort.subscribe(registry.error);
+  let app: elm.App | undefined;
 
   return async function handler(request) {
+    if (app === undefined) {
+      app = (await elm.load(server)).Main.init({ flags: {} });
+      app.ports.htmlPort.subscribe((msg) => defer.resolve(msg.id, msg));
+      app.ports.errorPort.subscribe((msg) => defer.reject(msg.id, msg.reason));
+    }
+
+    const { id, promise } = defer.get();
+    const timer = setTimeout(() => defer.reject(id, "timeout"), timeout);
+
     const url = new URL(request.url);
-    const { id, defer, timeout: cancel } = registry.defer(app);
 
     app.ports.httpPort.send({
       id,
       url: url.toString(),
-      headers: parseHeaders(request.headers),
+      headers: encode(request.headers),
     });
 
-    const timer = setTimeout(cancel, timeout);
-    const { view, model } = await defer;
+    const { view, model } = await promise;
 
     clearTimeout(timer);
 
     return new Response(
       await eta.renderFileAsync("index", {
-        inject,
+        extra,
         client,
         view,
         flags: JSON.stringify(model),
