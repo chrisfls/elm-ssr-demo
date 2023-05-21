@@ -15,19 +15,25 @@ export interface HttpPort {
   headers: { [key: string]: string[] };
 }
 
+export interface ErrorPort {
+  id: number;
+  reason: unknown;
+}
+
 export interface TimeoutPort {
   id: number;
 }
 
 export interface HtmlPort {
   id: number;
-  html: string;
+  value: string;
 }
 
 export interface Ports {
-  http: Send<HttpPort>;
-  timeout: Send<TimeoutPort>;
-  html: Subscription<HtmlPort>;
+  httpPort: Send<HttpPort>;
+  errorPort: Send<ErrorPort>;
+  timeoutPort: Send<TimeoutPort>;
+  htmlPort: Subscription<HtmlPort>;
 }
 
 export interface App {

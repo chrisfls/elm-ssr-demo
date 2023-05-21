@@ -35,8 +35,8 @@ function createRegistry() {
   const promises = new Map<number, Deferred<string>>();
 
   return {
-    resolve({ id, html }: HtmlPort) {
-      promises.get(id)?.resolve(html);
+    resolve({ id, value }: HtmlPort) {
+      promises.get(id)?.resolve(value);
       promises.delete(id);
     },
     defer() {
@@ -74,13 +74,13 @@ export async function createHandler(options?: Options): Promise<Handler> {
   const app = (await load(server)).Main.init({ flags: {} });
   const registry = createRegistry();
 
-  app.ports.html.subscribe(registry.resolve);
+  app.ports.htmlPort.subscribe(registry.resolve);
 
   return async function handler(request) {
     const url = new URL(request.url);
     const { id, defer, abort } = registry.defer();
 
-    app.ports.http.send({
+    app.ports.httpPort.send({
       id,
       url: url.toString(),
       headers: parseHeaders(request.headers),
@@ -88,7 +88,7 @@ export async function createHandler(options?: Options): Promise<Handler> {
 
     const timer = setTimeout(
       () => {
-        app.ports.timeout.send({ id });
+        app.ports.timeoutPort.send({ id });
         abort(new Error("Operation timed out"));
       },
       timeout,
