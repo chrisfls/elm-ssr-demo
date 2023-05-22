@@ -1,12 +1,12 @@
 module App exposing
-    ( Model, init, encode
+    ( Model, init, reuse, encode
     , Msg(..), update, subscriptions
     , ready, title, view
     )
 
 {-|
 
-@docs Model, init, encode
+@docs Model, init, reuse, encode
 @docs Msg, update, subscriptions
 @docs ready, title, view
 
@@ -39,23 +39,8 @@ type alias Model =
     }
 
 
-init : Value -> Url -> Headers -> ( Model, Cmd Msg )
-init flags url headers =
-    case Decode.decodeValue decoder flags of
-        Ok (Just model) ->
-            ( { model | url = url, headers = headers }
-            , Cmd.none
-            )
-
-        Ok Nothing ->
-            load url headers Nothing
-
-        Err error ->
-            load url headers (Just error)
-
-
-load : Url -> Headers -> Maybe Decode.Error -> ( Model, Cmd Msg )
-load url headers _ =
+init : Url -> Headers -> ( Model, Cmd Msg )
+init url headers =
     ( { url = url
       , headers = headers
       , ready = False
@@ -67,30 +52,32 @@ load url headers _ =
     )
 
 
-decoder : Decoder (Maybe Model)
-decoder =
+reuse : Value -> Url -> ( Model, Cmd Msg )
+reuse flags url =
+    case Decode.decodeValue (decoder url) flags of
+        Ok model ->
+            ( model, Cmd.none )
+
+        Err _ ->
+            -- TODO: send error back
+            init url Headers.empty
+
+
+decoder : Url -> Decoder Model
+decoder url =
     Decode.succeed Model
-        |> Decode.required "url"
-            (Decode.andThen
-                (Url.fromString
-                    >> Maybe.map Decode.succeed
-                    >> Maybe.withDefault (Decode.fail "Invalid url")
-                )
-                Decode.string
-            )
+        |> Decode.hardcoded url
         |> Decode.required "headers" Headers.decoder
         |> Decode.required "ready" Decode.bool
         |> Decode.required "name" Decode.string
         |> Decode.required "password" Decode.string
         |> Decode.required "passwordAgain" Decode.string
-        |> Decode.nullable
 
 
 encode : Model -> Value
 encode model =
     Encode.object
-        [ ( "url", Encode.string (Url.toString model.url) )
-        , ( "headers", Headers.encoder model.headers )
+        [ ( "headers", Headers.encoder model.headers )
         , ( "ready", Encode.bool model.ready )
         , ( "name", Encode.string model.name )
         , ( "password", Encode.string model.password )

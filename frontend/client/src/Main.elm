@@ -3,7 +3,6 @@ module Main exposing (main)
 import App
 import Browser
 import Browser.Navigation as Navigation
-import Headers
 import Json.Decode exposing (Value)
 import Url exposing (Url)
 
@@ -22,7 +21,7 @@ main =
 
 init : Value -> Url -> Navigation.Key -> ( App.Model, Cmd App.Msg )
 init flags url _ =
-    App.init flags url Headers.empty
+    App.reuse flags url
 
 
 view : App.Model -> Browser.Document App.Msg

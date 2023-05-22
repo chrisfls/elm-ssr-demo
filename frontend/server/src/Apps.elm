@@ -28,7 +28,7 @@ empty =
 
 insert : Int -> Url -> Headers -> Apps -> ( Apps, Action )
 insert id url headers (Apps dict) =
-    ready id dict (App.init Encode.null url headers)
+    ready id dict (App.init url headers)
 
 
 remove : Int -> Apps -> Apps
