@@ -6,25 +6,32 @@ import { refresh } from "refresh/mod.ts";
 
 import { createHandler } from "./server.ts";
 import { load } from "./app.ts";
-import { make } from "./elm.ts";
+import { make } from "./make.ts";
 
 const publicDir = "public";
-const hotswap = "hotswap.js";
+const reload = "reload.js";
 
 const tmp = async () => `${await Deno.makeTempFile()}.js`;
 const client = await tmp();
 const server = await tmp();
 
-const refresher = refresh();
+const refresher = refresh({
+  paths: [
+    "./client/lib",
+    "./client/src",
+    "./server/src",
+    "./public",
+  ],
+});
 
 const ssr = await createHandler({
   publicDir,
   server,
-  extra: hotswap,
   client: "bundle.js",
+  extra: reload,
 });
 
-if (!await fs.exists(hotswap)) {
+if (!await fs.exists(reload)) {
   const json = await Deno.readTextFile("./deno.jsonc");
   const deno: { imports: Record<string, string> } = eval(`(${json})`);
   const ns = deno.imports["refresh/"];
@@ -33,7 +40,7 @@ if (!await fs.exists(hotswap)) {
   const response = await fetch(`${ns}client.js`);
   const content = await response.text();
 
-  await Deno.writeTextFile(hotswap, content);
+  await Deno.writeTextFile(reload, content);
 }
 
 async function handler(
@@ -49,8 +56,8 @@ async function handler(
     return serveDir(request, { fsRoot: publicDir });
   }
 
-  if (url.pathname === `/${hotswap}`) {
-    return serveFile(request, hotswap);
+  if (url.pathname === `/${reload}`) {
+    return serveFile(request, reload);
   }
 
   if (url.pathname.startsWith(`/${publicDir}/`)) {

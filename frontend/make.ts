@@ -70,3 +70,7 @@ export async function make(input: string, options?: Options) {
 
   return status;
 }
+
+if (import.meta.main) {
+  // TODO: build app
+}

@@ -7,8 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body>
-    <% if (it.inject !== undefined && it.inject !== "") { %>
-    <script src="<%~ it.inject %>"></script>
+    <% if (it.extra !== undefined && it.extra !== "") { %>
+    <script src="<%~ it.extra %>"></script>
     <% } %>
     <div id="main"><%~ it.view %></div>
     <script src="<%~ it.client %>"></script>
