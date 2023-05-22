@@ -12,16 +12,17 @@ module App exposing
 
 -}
 
+import Browser exposing (UrlRequest)
 import Dual.Html exposing (..)
 import Dual.Html.Attributes exposing (..)
 import Dual.Html.Events exposing (onInput)
 import Eff exposing (Eff)
-import Graphql.Http
 import Headers exposing (Headers)
 import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Decode.Pipeline as Decode
 import Json.Encode as Encode
 import Query.User as User
+import Response exposing (Response)
 import Url exposing (Url)
 
 
@@ -90,16 +91,23 @@ encode model =
 
 
 type Msg
-    = Name String
+    = UrlChange Url
+    | UrlRequest UrlRequest
+    | Name String
     | Password String
     | PasswordAgain String
-    | Loaded (Result (Graphql.Http.Error User.Data) User.Data)
-    | Noop
+    | Loaded (Response User.Data)
 
 
 update : Msg -> Model -> ( Model, Eff Msg )
 update msg model =
     case msg of
+        UrlChange url ->
+            ( { model | url = url }, Eff.none )
+
+        UrlRequest _ ->
+            ( model, Eff.none )
+
         Name name ->
             ( { model | name = name }, Eff.none )
 
@@ -121,9 +129,6 @@ update msg model =
 
         Loaded (Err _) ->
             -- TODO: report error through log port
-            ( model, Eff.none )
-
-        Noop ->
             ( model, Eff.none )
 
 

@@ -8,23 +8,23 @@ import Json.Decode exposing (Value)
 import Url exposing (Url)
 
 
-type alias BrowserModel =
+type alias Model =
     { key : Navigation.Key, app : App.Model }
 
 
-main : Program Value BrowserModel App.Msg
+main : Program Value Model App.Msg
 main =
     Browser.application
         { init = init
         , update = update
         , view = view
         , subscriptions = .app >> App.subscriptions
-        , onUrlChange = \_ -> App.Noop
-        , onUrlRequest = \_ -> App.Noop
+        , onUrlChange = App.UrlChange
+        , onUrlRequest = App.UrlRequest
         }
 
 
-init : Value -> Url -> Navigation.Key -> ( BrowserModel, Cmd App.Msg )
+init : Value -> Url -> Navigation.Key -> ( Model, Cmd App.Msg )
 init flags url key =
     let
         ( model, eff ) =
@@ -35,7 +35,7 @@ init flags url key =
     )
 
 
-update : App.Msg -> BrowserModel -> ( BrowserModel, Cmd App.Msg )
+update : App.Msg -> Model -> ( Model, Cmd App.Msg )
 update msg { key, app } =
     let
         ( model_, eff ) =
@@ -46,7 +46,7 @@ update msg { key, app } =
     )
 
 
-view : BrowserModel -> Browser.Document App.Msg
+view : Model -> Browser.Document App.Msg
 view { app } =
     { title = App.title app
     , body = [ App.view app ]

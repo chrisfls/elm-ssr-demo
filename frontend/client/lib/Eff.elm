@@ -16,6 +16,7 @@ import Browser.Navigation as Navigation
 import Graphql.Http
 import Graphql.Operation exposing (RootQuery)
 import Graphql.SelectionSet exposing (SelectionSet)
+import Response exposing (Response)
 
 
 type Eff msg
@@ -82,7 +83,7 @@ performNavigation key effect =
 
 
 query :
-    (Result (Graphql.Http.Error decodesTo) decodesTo -> msg)
+    (Response decodesTo -> msg)
     -> SelectionSet decodesTo RootQuery
     -> Eff msg
 query msg =
