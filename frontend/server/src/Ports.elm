@@ -1,8 +1,9 @@
-port module Ports exposing (error, html, http, timeout)
+port module Ports exposing (cancel, html, http)
 
 import Headers exposing (Headers)
 import Json.Decode as Decode exposing (Value)
-import Json.Encode as Encode
+import Json.Decode.Pipeline as Decode
+import Url exposing (Url)
 
 
 
@@ -17,44 +18,16 @@ html id view model =
     htmlPort { id = id, view = view, model = model }
 
 
-port errorPort : Value -> Cmd msg
-
-
-error : Int -> Decode.Error -> Cmd msg
-error id decodeError =
-    Encode.object
-        [ ( "id", Encode.int id )
-        , ( "reason", decodeErrorEncoder decodeError )
-        ]
-        |> errorPort
-
-
-decodeErrorEncoder : Decode.Error -> Value
-decodeErrorEncoder decodeError =
-    case decodeError of
-        Decode.Field _ _ ->
-            Encode.null
-
-        Decode.Index _ _ ->
-            Encode.null
-
-        Decode.OneOf _ ->
-            Encode.null
-
-        Decode.Failure _ _ ->
-            Encode.null
-
-
 
 -- SUBSCRIPTIONS
 
 
-port httpPort : ({ id : Int, url : String, headers : Value } -> msg) -> Sub msg
+port httpPort : (Value -> msg) -> Sub msg
 
 
 http :
-    { onSuccess : Int -> String -> Headers -> msg
-    , onError : Int -> Decode.Error -> msg
+    { onSuccess : Int -> Url -> Headers -> msg
+    , onError : Decode.Error -> msg
     }
     -> Sub msg
 http { onSuccess, onError } =
@@ -62,22 +35,37 @@ http { onSuccess, onError } =
 
 
 httpHandler :
-    (Int -> String -> Headers -> msg)
-    -> (Int -> Decode.Error -> msg)
-    -> { id : Int, url : String, headers : Value }
+    (Int -> Url -> Headers -> msg)
+    -> (Decode.Error -> msg)
+    -> Value
     -> msg
-httpHandler onSuccess onError { id, url, headers } =
-    case Decode.decodeValue Headers.decoder headers of
-        Ok decodedHeaders ->
-            onSuccess id url decodedHeaders
+httpHandler onSuccess onError value =
+    case Decode.decodeValue httpDecoder value of
+        Ok { id, url, headers } ->
+            onSuccess id url headers
 
         Err reason ->
-            onError id reason
+            onError reason
 
 
-port timeoutPort : ({ id : Int } -> msg) -> Sub msg
+httpDecoder : Decode.Decoder { id : Int, url : Url, headers : Headers }
+httpDecoder =
+    Decode.succeed (\id url headers -> { id = id, url = url, headers = headers })
+        |> Decode.required "id" Decode.int
+        |> Decode.required "url"
+            (Decode.andThen
+                (Url.fromString
+                    >> Maybe.map Decode.succeed
+                    >> Maybe.withDefault (Decode.fail "Invalid url")
+                )
+                Decode.string
+            )
+        |> Decode.required "headers" Headers.decoder
 
 
-timeout : (Int -> msg) -> Sub msg
-timeout msg =
-    timeoutPort (.id >> msg)
+port cancelPort : ({ id : Int } -> msg) -> Sub msg
+
+
+cancel : (Int -> msg) -> Sub msg
+cancel msg =
+    cancelPort (.id >> msg)

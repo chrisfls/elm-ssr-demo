@@ -1,15 +1,28 @@
-module App exposing (Model, Msg(..), decoder, encoder, init, ready, reuse, subscriptions, title, update, view)
+module App exposing
+    ( Model, init, encode
+    , Msg(..), update, subscriptions
+    , ready, title, view
+    )
+
+{-|
+
+@docs Model, init, encode
+@docs Msg, update, subscriptions
+@docs ready, title, view
+
+-}
 
 import Dual.Html exposing (..)
 import Dual.Html.Attributes exposing (..)
 import Dual.Html.Events exposing (onInput)
 import Graphql.Http
-import Graphql.Operation exposing (RootQuery)
-import Graphql.SelectionSet exposing (SelectionSet)
 import Headers exposing (Headers)
 import Json.Decode as Decode exposing (Decoder, Value)
+import Json.Decode.Pipeline as Decode
 import Json.Encode as Encode
 import Query.User as User
+import Request
+import Url exposing (Url)
 
 
 
@@ -17,54 +30,71 @@ import Query.User as User
 
 
 type alias Model =
-    { name : String
+    { url : Url
+    , headers : Headers
+    , ready : Bool
+    , name : String
     , password : String
     , passwordAgain : String
-    , loaded : Bool
-    , headers : Headers
     }
 
 
-init : String -> Headers -> ( Model, Cmd Msg )
-init _ headers =
-    ( empty headers
-    , requestQuery Loaded User.query
+init : Value -> Url -> Headers -> ( Model, Cmd Msg )
+init flags url headers =
+    case Decode.decodeValue decoder flags of
+        Ok (Just model) ->
+            ( { model | url = url, headers = headers }
+            , Cmd.none
+            )
+
+        Ok Nothing ->
+            load url headers Nothing
+
+        Err error ->
+            load url headers (Just error)
+
+
+load : Url -> Headers -> Maybe Decode.Error -> ( Model, Cmd Msg )
+load url headers _ =
+    ( { url = url
+      , headers = headers
+      , ready = False
+      , name = ""
+      , password = ""
+      , passwordAgain = ""
+      }
+    , Request.query Loaded User.query
     )
 
 
-empty : Headers -> Model
-empty headers =
-    { name = ""
-    , password = ""
-    , passwordAgain = ""
-    , loaded = False
-    , headers = headers
-    }
-
-
-reuse : Model -> ( Model, Cmd Msg )
-reuse model =
-    ( model, Cmd.none )
-
-
-decoder : Decoder Model
+decoder : Decoder (Maybe Model)
 decoder =
-    Decode.map5 Model
-        (Decode.field "name" Decode.string)
-        (Decode.field "password" Decode.string)
-        (Decode.field "passwordAgain" Decode.string)
-        (Decode.field "loaded" Decode.bool)
-        (Decode.field "headers" Headers.decoder)
+    Decode.succeed Model
+        |> Decode.required "url"
+            (Decode.andThen
+                (Url.fromString
+                    >> Maybe.map Decode.succeed
+                    >> Maybe.withDefault (Decode.fail "Invalid url")
+                )
+                Decode.string
+            )
+        |> Decode.required "headers" Headers.decoder
+        |> Decode.required "ready" Decode.bool
+        |> Decode.required "name" Decode.string
+        |> Decode.required "password" Decode.string
+        |> Decode.required "passwordAgain" Decode.string
+        |> Decode.nullable
 
 
-encoder : Model -> Value
-encoder model =
+encode : Model -> Value
+encode model =
     Encode.object
-        [ ( "name", Encode.string model.name )
+        [ ( "url", Encode.string (Url.toString model.url) )
+        , ( "headers", Headers.encoder model.headers )
+        , ( "ready", Encode.bool model.ready )
+        , ( "name", Encode.string model.name )
         , ( "password", Encode.string model.password )
         , ( "passwordAgain", Encode.string model.passwordAgain )
-        , ( "loaded", Encode.bool model.loaded )
-        , ( "headers", Headers.encoder model.headers )
         ]
 
 
@@ -94,15 +124,15 @@ update msg model =
 
         Loaded (Ok data) ->
             ( { model
-                | name = data.name
+                | ready = True
+                , name = data.name
                 , password = data.password
                 , passwordAgain = data.passwordAgain
-                , loaded = True
               }
             , Cmd.none
             )
 
-        Loaded _ ->
+        Loaded (Err error) ->
             -- TODO: report error through log port
             ( model, Cmd.none )
 
@@ -121,7 +151,7 @@ subscriptions _ =
 
 ready : Model -> Bool
 ready model =
-    model.loaded
+    model.ready
 
 
 title : Model -> String
@@ -151,16 +181,3 @@ viewValidation model =
 
     else
         div [ style "color" "red" ] [ text "Passwords do not match!" ]
-
-
-
--- COMMANDS
-
-
-requestQuery :
-    (Result (Graphql.Http.Error decodesTo) decodesTo -> msg)
-    -> SelectionSet decodesTo RootQuery
-    -> Cmd msg
-requestQuery msg =
-    Graphql.Http.queryRequest "http://localhost:4000/api"
-        >> Graphql.Http.send msg

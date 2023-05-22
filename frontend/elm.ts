@@ -19,12 +19,12 @@ export interface HttpPort {
   headers: { [key: string]: string[] };
 }
 
-export interface ErrorPort {
-  id: number;
-  reason: unknown;
+export interface LoggerPort {
+  level: "debug" | "error" | "info" | "log" | "trace" | "warn";
+  message: string;
 }
 
-export interface TimeoutPort {
+export interface CancelPort {
   id: number;
 }
 
@@ -36,9 +36,9 @@ export interface HtmlPort {
 
 export interface Ports {
   httpPort: Send<HttpPort>;
-  timeoutPort: Send<TimeoutPort>;
+  cancelPort: Send<CancelPort>;
   htmlPort: Subscription<HtmlPort>;
-  errorPort: Subscription<ErrorPort>;
+  loggerPort: Subscription<LoggerPort>;
 }
 
 export interface App {

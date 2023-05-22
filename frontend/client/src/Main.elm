@@ -4,7 +4,7 @@ import App
 import Browser
 import Browser.Navigation as Navigation
 import Headers
-import Json.Decode as Decode exposing (Value)
+import Json.Decode exposing (Value)
 import Url exposing (Url)
 
 
@@ -21,13 +21,8 @@ main =
 
 
 init : Value -> Url -> Navigation.Key -> ( App.Model, Cmd App.Msg )
-init flags _ _ =
-    case Decode.decodeValue App.decoder flags of
-        Ok model ->
-            App.reuse model
-
-        Err _ ->
-            App.init "" Headers.empty
+init flags url _ =
+    App.init flags url Headers.empty
 
 
 view : App.Model -> Browser.Document App.Msg

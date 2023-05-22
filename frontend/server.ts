@@ -32,7 +32,7 @@ async function find(
   for await (const entry of Deno.readDir(directory)) {
     if (!entry.isFile) continue;
 
-    const matches = entry.name.match(/^bundle\.(\d+)\.js$/)
+    const matches = entry.name.match(/^bundle\.(\d+)\.js$/);
     if (matches == null) continue;
 
     const match = matches[1];
@@ -98,7 +98,7 @@ export async function createHandler(options?: Options): Promise<Handler> {
   const extra = options?.extra;
 
   if (client === undefined) {
-    throw new Error("client is undefined");
+    throw new Error("Unable to find the client build");
   }
 
   const config = eta.configure({ views: Deno.cwd() });
@@ -110,11 +110,17 @@ export async function createHandler(options?: Options): Promise<Handler> {
     if (app === undefined) {
       app = (await elm.load(server)).Main.init({ flags: {} });
       app.ports.htmlPort.subscribe((msg) => defer.resolve(msg.id, msg));
-      app.ports.errorPort.subscribe((msg) => defer.reject(msg.id, msg.reason));
+      app.ports.loggerPort.subscribe(
+        ({ level, message }) => console[level](message),
+      );
     }
 
     const { id, promise } = defer.get();
-    const timer = setTimeout(() => defer.reject(id, "timeout"), timeout);
+
+    const timer = setTimeout(() => {
+      if (app) app.ports.cancelPort.send({ id });
+      defer.reject(id, new Error("Server-side rendering timed out"));
+    }, timeout);
 
     const url = new URL(request.url);
 

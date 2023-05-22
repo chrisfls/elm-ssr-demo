@@ -6,7 +6,9 @@ import Headers exposing (Headers)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Json.Decode as Decode
+import Log
 import Ports
+import Url exposing (Url)
 
 
 
@@ -38,8 +40,8 @@ init () =
 
 
 type Msg
-    = Http Int String Headers
-    | Error Int Decode.Error
+    = Http Int Url Headers
+    | Error Decode.Error
     | Timeout Int
     | Msg Int App.Msg
 
@@ -50,9 +52,9 @@ update msg model =
         Http id url headers ->
             perform id model (Apps.insert id url headers model.apps)
 
-        Error id error ->
-            ( { model | apps = Apps.remove id model.apps }
-            , Ports.error id error
+        Error error ->
+            ( model
+            , Log.error (Decode.errorToString error)
             )
 
         Timeout id ->
@@ -82,5 +84,5 @@ subscriptions : Sub Msg
 subscriptions =
     Sub.batch
         [ Ports.http { onSuccess = Http, onError = Error }
-        , Ports.timeout Timeout
+        , Ports.cancel Timeout
         ]
