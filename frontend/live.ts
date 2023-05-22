@@ -65,19 +65,17 @@ async function handler(
   }
 
   if (url.pathname === "/bundle.js") {
-    await make("src/Main.elm", {
+    await make("src/Main.elm", client, {
       cwd: "./client",
       debug: true,
-      output: client,
     });
 
     return serveFile(request, client);
   }
 
-  await make("src/Main.elm", {
+  await make("src/Main.elm", server, {
     cwd: "./server",
     debug: true,
-    output: server,
     deno: true,
   });
 

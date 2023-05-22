@@ -14,9 +14,6 @@ export interface Options {
   /** Turn on optimizations to make code smaller and faster. */
   optimize?: boolean;
 
-  /** Specify the name of the resulting JS file. */
-  output?: string;
-
   /** Get error messages as JSON. Not useful as this command doesn't capture outputs. */
   report?: "json";
 
@@ -34,12 +31,8 @@ async function deno(filePath: string) {
   );
 }
 
-export async function make(input: string, options?: Options) {
-  if (options?.deno && !options?.output) {
-    throw new Error(
-      "Cannot compile for Deno without specifying a JavaScript output.",
-    );
-  }
+export async function make(input: string, output: string, options?: Options) {
+  const tmp = `${await Deno.makeTempFile()}.js`;
 
   const cmd = [
     options?.elm ?? "elm",
@@ -47,7 +40,7 @@ export async function make(input: string, options?: Options) {
     input,
     ...(options?.debug ? ["--debug"] : []),
     ...(options?.optimize ? ["--optimize"] : []),
-    ...(options?.output ? [`--output=${options.output}`] : []),
+    `--output=${tmp}`,
     ...(options?.report ? [`--report=${options.report}`] : []),
     ...(options?.docs ? [`--docs=${options.docs}`] : []),
   ];
@@ -64,13 +57,25 @@ export async function make(input: string, options?: Options) {
 
   const status = await process.status();
 
-  if (status.success && options?.deno && options?.output) {
-    await deno(options.output);
+  if (status.success && options?.deno) {
+    await deno(tmp);
   }
+
+  await Deno.copyFile(tmp, output);
 
   return status;
 }
 
 if (import.meta.main) {
   // TODO: build app
+  await make("src/Main.elm", `public/bundle.${Date.now()}.js`, {
+    cwd: "./client",
+    optimize: true,
+  });
+
+  await make("src/Main.elm", "./ssr.js", {
+    cwd: "./server",
+    optimize: true,
+    deno: true,
+  });
 }
