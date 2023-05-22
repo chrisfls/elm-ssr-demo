@@ -32,7 +32,12 @@ sudo systemctl enable docker
 
 ## Notes
 
-This doesn't do any hydration, so it diffs the whole view after loading. But this is not so bad as it does reuse the model.
+This doesn't do any hydration, so it diffs the whole view after loading. But this is not that bad as it does reuse the model, avoiding useless reloads.
 
-Rendering on the server is done thanks to [elm-html-string](https://github.com/zwilias/elm-html-string), so this doesn't support [elm-ui](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/) and components available in [elm packages](https://package.elm-lang.org/).
+Rendering on the server is done thanks to [elm-html-string](https://github.com/zwilias/elm-html-string) so this doesn't support [elm-ui](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/) and components available in [elm packages](https://package.elm-lang.org/).
+
+This could be fixed abusing a hack from [elm-test](https://github.com/elm-explorations/test/blob/master/src/Elm/Kernel/HtmlAsJson.js), but I didn't want to redo this hack here.
+
+I didn't do any routing here, but it can be done easily in the same way [elm-spa-example](https://github.com/rtfeldman/elm-spa-example/blob/master/src/Route.elm) does.
+
 For a solution more compatible with available packages see [elm-pages](https://github.com/dillonkearns/elm-pages).
