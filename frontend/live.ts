@@ -5,7 +5,7 @@ import * as fs from "std/fs/mod.ts";
 import { refresh } from "refresh/mod.ts";
 
 import { createHandler } from "./server.ts";
-import { load } from "./app.ts";
+import { load } from "./elm.ts";
 import { make } from "./make.ts";
 
 const publicDir = "public";

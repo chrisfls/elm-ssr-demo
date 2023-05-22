@@ -4,7 +4,7 @@ import * as path from "std/path/mod.ts";
 
 import * as eta from "eta";
 
-import * as elm from "./app.ts";
+import * as elm from "./elm.ts";
 
 export interface Options {
   /** Path for public assets. */
