@@ -3,29 +3,51 @@ module Main exposing (main)
 import App
 import Browser
 import Browser.Navigation as Navigation
+import Eff
 import Json.Decode exposing (Value)
 import Url exposing (Url)
 
 
-main : Program Value App.Model App.Msg
+type alias BrowserModel =
+    { key : Navigation.Key, app : App.Model }
+
+
+main : Program Value BrowserModel App.Msg
 main =
     Browser.application
         { init = init
-        , update = App.update
+        , update = update
         , view = view
-        , subscriptions = App.subscriptions
+        , subscriptions = .app >> App.subscriptions
         , onUrlChange = \_ -> App.Noop
         , onUrlRequest = \_ -> App.Noop
         }
 
 
-init : Value -> Url -> Navigation.Key -> ( App.Model, Cmd App.Msg )
-init flags url _ =
-    App.reuse flags url
+init : Value -> Url -> Navigation.Key -> ( BrowserModel, Cmd App.Msg )
+init flags url key =
+    let
+        ( model, eff ) =
+            App.reuse flags url
+    in
+    ( { key = key, app = model }
+    , Eff.performNavigation key eff
+    )
 
 
-view : App.Model -> Browser.Document App.Msg
-view model =
-    { title = App.title model
-    , body = [ App.view model ]
+update : App.Msg -> BrowserModel -> ( BrowserModel, Cmd App.Msg )
+update msg { key, app } =
+    let
+        ( model_, eff ) =
+            App.update msg app
+    in
+    ( { key = key, app = model_ }
+    , Eff.performNavigation key eff
+    )
+
+
+view : BrowserModel -> Browser.Document App.Msg
+view { app } =
+    { title = App.title app
+    , body = [ App.view app ]
     }

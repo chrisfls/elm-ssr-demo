@@ -4,7 +4,8 @@ import App
 import Headers exposing (Headers)
 import Html.String
 import IntDict exposing (IntDict)
-import Json.Encode as Encode exposing (Value)
+import Json.Encode exposing (Value)
+import Eff exposing (Eff)
 import Url exposing (Url)
 
 
@@ -48,8 +49,8 @@ update id msg ((Apps dict) as apps) =
             )
 
 
-ready : Int -> IntDict App.Model -> ( App.Model, Cmd App.Msg ) -> ( Apps, Action )
-ready id dict ( model, cmd ) =
+ready : Int -> IntDict App.Model -> ( App.Model, Eff App.Msg ) -> ( Apps, Action )
+ready id dict ( model, eff ) =
     if App.ready model then
         ( Apps (IntDict.remove id dict)
         , View (Html.String.toString 0 (App.view model)) (App.encode model)
@@ -57,7 +58,7 @@ ready id dict ( model, cmd ) =
 
     else
         ( Apps (IntDict.insert id model dict)
-        , Perform cmd
+        , Perform (Eff.perform eff)
         )
 
 

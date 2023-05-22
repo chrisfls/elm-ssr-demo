@@ -15,13 +15,13 @@ module App exposing
 import Dual.Html exposing (..)
 import Dual.Html.Attributes exposing (..)
 import Dual.Html.Events exposing (onInput)
+import Eff exposing (Eff)
 import Graphql.Http
 import Headers exposing (Headers)
 import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Decode.Pipeline as Decode
 import Json.Encode as Encode
 import Query.User as User
-import Request
 import Url exposing (Url)
 
 
@@ -39,7 +39,7 @@ type alias Model =
     }
 
 
-init : Url -> Headers -> ( Model, Cmd Msg )
+init : Url -> Headers -> ( Model, Eff Msg )
 init url headers =
     ( { url = url
       , headers = headers
@@ -48,15 +48,15 @@ init url headers =
       , password = ""
       , passwordAgain = ""
       }
-    , Request.query Loaded User.query
+    , Eff.query Loaded User.query
     )
 
 
-reuse : Value -> Url -> ( Model, Cmd Msg )
+reuse : Value -> Url -> ( Model, Eff Msg )
 reuse flags url =
     case Decode.decodeValue (decoder url) flags of
         Ok model ->
-            ( model, Cmd.none )
+            ( model, Eff.none )
 
         Err _ ->
             -- TODO: send error back
@@ -97,17 +97,17 @@ type Msg
     | Noop
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> ( Model, Eff Msg )
 update msg model =
     case msg of
         Name name ->
-            ( { model | name = name }, Cmd.none )
+            ( { model | name = name }, Eff.none )
 
         Password password ->
-            ( { model | password = password }, Cmd.none )
+            ( { model | password = password }, Eff.none )
 
         PasswordAgain password ->
-            ( { model | passwordAgain = password }, Cmd.none )
+            ( { model | passwordAgain = password }, Eff.none )
 
         Loaded (Ok data) ->
             ( { model
@@ -116,15 +116,15 @@ update msg model =
                 , password = data.password
                 , passwordAgain = data.passwordAgain
               }
-            , Cmd.none
+            , Eff.none
             )
 
-        Loaded (Err error) ->
+        Loaded (Err _) ->
             -- TODO: report error through log port
-            ( model, Cmd.none )
+            ( model, Eff.none )
 
         Noop ->
-            ( model, Cmd.none )
+            ( model, Eff.none )
 
 
 subscriptions : Model -> Sub Msg
