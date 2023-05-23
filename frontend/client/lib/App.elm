@@ -27,7 +27,6 @@ import Response exposing (Response)
 import Url exposing (Url)
 
 
-
 -- MODEL
 
 
@@ -178,7 +177,7 @@ viewInput t p v toMsg =
     input [ type_ t, placeholder p, value v, onInput toMsg ] []
 
 
-viewValidation : Model -> Html msg
+viewValidation : Model -> Html msdg
 viewValidation model =
     if model.password == model.passwordAgain then
         div [ style "color" "green" ] [ text "OK" ]

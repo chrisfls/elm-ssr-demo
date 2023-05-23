@@ -5,7 +5,6 @@ import * as path from "std/path/mod.ts";
 import * as eta from "eta";
 
 import * as elm from "./elm.ts";
-import { tailwind } from "./deps.ts";
 
 export interface Options {
   /** Path for public assets. */
@@ -107,7 +106,10 @@ export async function createHandler(options?: Options): Promise<Handler> {
 
   let app: elm.App | undefined;
 
-  const link = { tailwind };
+  const link = {
+    tailwind:
+      "https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css",
+  };
 
   return async function handler(request) {
     if (app === undefined) {

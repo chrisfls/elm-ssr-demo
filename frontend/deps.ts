@@ -1,2 +1,0 @@
-export const tailwind =
-  "https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css";
