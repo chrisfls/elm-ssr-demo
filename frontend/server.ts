@@ -5,21 +5,22 @@ import * as path from "std/path/mod.ts";
 import * as eta from "eta";
 
 import * as elm from "./elm.ts";
+import { tailwind } from "./deps.ts";
 
 export interface Options {
   /** Path for public assets. */
   publicDir?: string;
 
-  /** Path to server js. */
+  /** Path to server-side JavaScript. */
   server?: string;
 
-  /** Path to client js. */
+  /** Path to client-side JavaScript. */
   client?: string;
 
   /** Timeout for rendering. */
   timeout?: number;
 
-  /** Extra script to inject (used by hotswap) */
+  /** Extra script to inject, can be used to implement live-reload. */
   extra?: string;
 }
 
@@ -106,6 +107,8 @@ export async function createHandler(options?: Options): Promise<Handler> {
 
   let app: elm.App | undefined;
 
+  const link = { tailwind };
+
   return async function handler(request) {
     if (app === undefined) {
       app = (await elm.load(server)).Main.init({ flags: {} });
@@ -136,10 +139,16 @@ export async function createHandler(options?: Options): Promise<Handler> {
 
     return new Response(
       await eta.renderFileAsync("index", {
-        extra,
+        // client-side js
         client,
+        // extra js (used by live-reload)
+        extra,
+        // link dependencies
+        link,
+        // pre-rendered view
         view,
-        flags: JSON.stringify(model),
+        // model yielded from backend
+        model: JSON.stringify(model),
       }, config),
       {
         status: 200,

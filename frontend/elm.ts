@@ -2,8 +2,6 @@
 
 import XMLHttpRequest from "xhr-shim";
 
-globalThis["XMLHttpRequest"] = XMLHttpRequest;
-
 export interface Send<Message> {
   send(message: Message): void;
 }
@@ -58,6 +56,11 @@ export interface Elm {
 }
 
 export async function load(filePath: string): Promise<Elm> {
+  if (globalThis["XMLHttpRequest"] == null) {
+    globalThis["XMLHttpRequest"] = XMLHttpRequest;
+  }
+
   await import(filePath);
+
   return (globalThis as unknown as { Elm: Elm })["Elm"];
 }

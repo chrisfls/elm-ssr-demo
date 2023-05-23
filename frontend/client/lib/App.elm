@@ -17,6 +17,7 @@ import Dual.Html exposing (..)
 import Dual.Html.Attributes exposing (..)
 import Dual.Html.Events exposing (onInput)
 import Eff exposing (Eff)
+import Graphql.Http
 import Headers exposing (Headers)
 import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Decode.Pipeline as Decode
@@ -49,7 +50,7 @@ init url headers =
       , password = ""
       , passwordAgain = ""
       }
-    , Eff.query Loaded User.query
+    , Eff.query GotUser User.query
     )
 
 
@@ -96,7 +97,7 @@ type Msg
     | Name String
     | Password String
     | PasswordAgain String
-    | Loaded (Response User.Data)
+    | GotUser (Response User.Data)
 
 
 update : Msg -> Model -> ( Model, Eff Msg )
@@ -117,19 +118,30 @@ update msg model =
         PasswordAgain password ->
             ( { model | passwordAgain = password }, Eff.none )
 
-        Loaded (Ok data) ->
-            ( { model
-                | ready = True
-                , name = data.name
-                , password = data.password
-                , passwordAgain = data.passwordAgain
-              }
-            , Eff.none
-            )
+        GotUser result ->
+            case result of
+                Ok data ->
+                    ( { model
+                        | ready = True
+                        , name = data.name
+                        , password = data.password
+                        , passwordAgain = data.passwordAgain
+                      }
+                    , Eff.none
+                    )
 
-        Loaded (Err _) ->
-            -- TODO: report error through log port
-            ( model, Eff.none )
+                Err error ->
+                    ( model, queryError "user" error )
+
+
+queryError : String -> Graphql.Http.RawError parsedData httpError -> Eff Msg
+queryError _ error =
+    case error of
+        Graphql.Http.GraphqlError _ _ ->
+            Eff.error "query error"
+
+        Graphql.Http.HttpError _ ->
+            Eff.error "transport error"
 
 
 subscriptions : Model -> Sub Msg

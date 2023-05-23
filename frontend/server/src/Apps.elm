@@ -1,11 +1,11 @@
 module Apps exposing (Action(..), Apps, empty, insert, remove, update)
 
 import App
+import Eff exposing (Eff)
 import Headers exposing (Headers)
 import Html.String
 import IntDict exposing (IntDict)
 import Json.Encode exposing (Value)
-import Eff exposing (Eff)
 import Url exposing (Url)
 
 

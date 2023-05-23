@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body>
     <% if (it.extra !== undefined && it.extra !== "") { %>
@@ -12,11 +11,16 @@
     <% } %>
     <div id="main"><%~ it.view %></div>
     <script src="<%~ it.client %>"></script>
+    <link rel="stylesheet" href="<%~ it.link.tailwind %>" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script>
       var app = Elm.Main.init({
         node: document.getElementById("main"),
-        flags: <%~ it.flags %>
+        flags: <%~ it.model %>
       });
+      if (app.ports.loggerPort)
+        app.ports.loggerPort.subscribe(function (value) {
+          console[value.level](value.message)
+        });
     </script>
   </body>
 </html>

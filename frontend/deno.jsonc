@@ -1,7 +1,10 @@
 {
   "imports": {
     "std/": "https://deno.land/std@0.188.0/",
+    "camelize": "https://esm.sh/camelize@1.0.1",
     "eta": "https://deno.land/x/eta@v2.1.0/mod.ts",
+    "postcss": "https://deno.land/x/postcss@8.4.16/mod.js",
+    "prettier": "npm:prettier@2.8.8",
     "refresh/": "https://deno.land/x/refresh@1.0.0/",
     "xhr-shim": "https://esm.sh/xhr-shim@0.1.3"
   },
