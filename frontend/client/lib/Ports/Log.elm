@@ -1,4 +1,4 @@
-port module Log exposing
+port module Ports.Log exposing
     ( debug
     , error
     , info

@@ -6,8 +6,8 @@ import Headers exposing (Headers)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Json.Decode as Decode
-import Log
 import Ports
+import Ports.Log as Log
 import Url exposing (Url)
 
 

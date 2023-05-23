@@ -1,6 +1,7 @@
 module Eff exposing
     ( Eff, none, batch, map
     , perform, performNavigation
+    , debug, error, info, log, trace, warn
     , query
     )
 
@@ -8,6 +9,8 @@ module Eff exposing
 
 @docs Eff, none, batch, map
 @docs perform, performNavigation
+
+@docs debug, error, info, log, trace, warn
 @docs query
 
 -}
@@ -16,6 +19,7 @@ import Browser.Navigation as Navigation
 import Graphql.Http
 import Graphql.Operation exposing (RootQuery)
 import Graphql.SelectionSet exposing (SelectionSet)
+import Ports.Log
 import Response exposing (Response)
 
 
@@ -80,6 +84,36 @@ performNavigation key effect =
 
 
 -- EFFECTS
+
+
+debug : String -> Eff msg
+debug =
+    Ports.Log.debug >> EffForCmd
+
+
+error : String -> Eff msg
+error =
+    Ports.Log.error >> EffForCmd
+
+
+info : String -> Eff msg
+info =
+    Ports.Log.info >> EffForCmd
+
+
+log : String -> Eff msg
+log =
+    Ports.Log.log >> EffForCmd
+
+
+trace : String -> Eff msg
+trace =
+    Ports.Log.trace >> EffForCmd
+
+
+warn : String -> Eff msg
+warn =
+    Ports.Log.warn >> EffForCmd
 
 
 query :
