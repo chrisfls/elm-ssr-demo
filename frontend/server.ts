@@ -92,7 +92,7 @@ function encode(requestHeaders: Headers): elm.HttpPort["headers"] {
 
 export async function createHandler(options?: Options): Promise<Handler> {
   const publicDir = options?.publicDir ?? "public";
-  const server = options?.server ?? "ssr.js";
+  const server = options?.server ?? "bundle.js";
   const client = options?.client ?? await find(publicDir);
   const timeout = options?.timeout ?? 10000;
   const extra = options?.extra;
@@ -113,10 +113,13 @@ export async function createHandler(options?: Options): Promise<Handler> {
 
   return async function handler(request) {
     if (app === undefined) {
-      app = (await elm.load(server)).Main.init({ flags: {} });
+      app = (await elm.load(server)).Server.Main.init({ flags: {} });
       app.ports.htmlPort.subscribe((msg) => defer.resolve(msg.id, msg));
       app.ports.loggerPort.subscribe(
         ({ level, message }) => console[level](message),
+      );
+      app.ports.sendPort.subscribe(
+        ({ message, callback }) => console.log("unsafe:", message, callback, typeof callback),
       );
     }
 

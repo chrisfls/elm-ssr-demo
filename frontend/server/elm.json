@@ -2,7 +2,7 @@
   "type": "application",
   "source-directories": [
     "src",
-    "../client/lib"
+    "../src"
   ],
   "elm-version": "0.19.1",
   "dependencies": {
@@ -14,8 +14,8 @@
       "elm/html": "1.0.0",
       "elm/json": "1.1.3",
       "elm/url": "1.0.0",
-      "elm-community/intdict": "3.0.0",
-      "zwilias/elm-html-string": "2.0.2"
+      "elm/virtual-dom": "1.0.3",
+      "elm-community/intdict": "3.0.0"
     },
     "indirect": {
       "NoRedInk/elm-string-conversions": "1.0.1",
@@ -24,7 +24,6 @@
       "elm/http": "2.0.0",
       "elm/regex": "1.0.0",
       "elm/time": "1.0.0",
-      "elm/virtual-dom": "1.0.3",
       "j-maas/elm-ordered-containers": "1.0.0",
       "lukewestby/elm-string-interpolate": "1.0.4"
     }

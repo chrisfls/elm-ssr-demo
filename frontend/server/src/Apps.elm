@@ -3,9 +3,9 @@ module Apps exposing (Action(..), Apps, empty, insert, remove, update)
 import App
 import Eff exposing (Eff)
 import Headers exposing (Headers)
-import Html.String
 import IntDict exposing (IntDict)
 import Json.Encode exposing (Value)
+import Server.Html as Html
 import Url exposing (Url)
 
 
@@ -53,7 +53,12 @@ ready : Int -> IntDict App.Model -> ( App.Model, Eff App.Msg ) -> ( Apps, Action
 ready id dict ( model, eff ) =
     if App.ready model then
         ( Apps (IntDict.remove id dict)
-        , View (Html.String.toString 0 (App.view model)) (App.encode model)
+        , case Html.toString (App.view model) of
+            Ok html ->
+                View html (App.encode model)
+
+            Err error ->
+                View error (App.encode model)
         )
 
     else

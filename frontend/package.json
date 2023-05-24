@@ -6,6 +6,6 @@
     "graphql": "16"
   },
   "scripts": {
-    "api": "elm-graphql http://localhost:4000/api --output client/lib"
+    "api": "elm-graphql http://localhost:4000/api --output src"
   }
 }

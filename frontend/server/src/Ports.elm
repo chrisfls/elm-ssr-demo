@@ -1,8 +1,9 @@
-port module Ports exposing (cancel, html, http)
+port module Ports exposing (cancel, html, http, send)
 
 import Headers exposing (Headers)
 import Json.Decode as Decode exposing (Value)
 import Json.Decode.Pipeline as Decode
+import Json.Encode as Encode
 import Url exposing (Url)
 
 
@@ -17,6 +18,21 @@ html : Int -> String -> Value -> Cmd msg
 html id view model =
     htmlPort { id = id, view = view, model = model }
 
+
+port sendPort : Value -> Cmd msg
+
+
+send : Value -> (Value -> msg) -> Cmd msg
+send message callback =
+    Encode.object
+        [ ( "message", message )
+        , ( "callback", callbackToJson callback )
+        ]
+        |> sendPort 
+
+callbackToJson : (Value -> msg) -> Value
+callbackToJson _ =
+    Encode.string "669f628dd586bc07deb2eef6138aac7a0941bce4e2a8b4bfcfd8a41b18db7401"
 
 
 -- SUBSCRIPTIONS

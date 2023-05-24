@@ -6,7 +6,7 @@ import { refresh } from "refresh/mod.ts";
 
 import { createHandler } from "./server.ts";
 import { load } from "./elm.ts";
-import { make } from "./make.ts";
+import { make, replacements } from "./make.ts";
 
 const publicDir = "public";
 const reload = "reload.js";
@@ -17,8 +17,7 @@ const server = await tmp();
 
 const refresher = refresh({
   paths: [
-    "./client/lib",
-    "./client/src",
+    "./src",
     "./server/src",
     "./public",
   ],
@@ -66,17 +65,20 @@ async function handler(
 
   if (url.pathname === "/bundle.js") {
     await make("src/Main.elm", client, {
-      cwd: "./client",
       debug: true,
     });
 
     return serveFile(request, client);
   }
 
-  await make("src/Main.elm", server, {
+  await make("src/Server/Main.elm", server, {
     cwd: "./server",
     debug: true,
     deno: true,
+    replace: [
+      replacements.serverHtmlToJson,
+      replacements.serverMessageToJson,
+    ],
   });
 
   await load(server);

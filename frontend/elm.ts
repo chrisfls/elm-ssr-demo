@@ -37,6 +37,7 @@ export interface Ports {
   cancelPort: Send<CancelPort>;
   htmlPort: Subscription<HtmlPort>;
   loggerPort: Subscription<LoggerPort>;
+  sendPort: Subscription<{ message: unknown, callback: (message: unknown) => unknown}>;
 }
 
 export interface App {
@@ -52,7 +53,7 @@ export interface Main {
 }
 
 export interface Elm {
-  Main: Main;
+  Server: { Main: Main };
 }
 
 export async function load(filePath: string): Promise<Elm> {

@@ -1,5 +1,7 @@
 .direnv
-*.js
 *elm-graphql-metadata.json
+bundle.*.js
+bundle.js
 elm-stuff
 node_modules
+reload.js

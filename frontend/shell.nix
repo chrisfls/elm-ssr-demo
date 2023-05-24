@@ -5,7 +5,7 @@ mkShell {
     deno
     elmPackages.elm
     elmPackages.elm-format
-    elmPackages.elm-test
+    elmPackages.elm-test-rs
     elmPackages.elm-review
     nodejs-16_x # needed by elm-language-server
     nodePackages.pnpm # needed by elm-graphql
