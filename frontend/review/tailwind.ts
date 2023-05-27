@@ -41,13 +41,13 @@ result.root.walkRules((node) => {
 
     if (first) {
       first = false;
-      elm += `[ ${JSON.stringify(name)}`
+      elm += `[ ${JSON.stringify(name)}`;
     } else {
-      elm += `, ${JSON.stringify(name)}`
+      elm += `, ${JSON.stringify(name)}`;
     }
   }
 });
 
-elm += ']\n'
+elm += "]\n";
 
 await Deno.writeTextFile("./src/NoInvalidTailwindClass/Classes.elm", elm);
