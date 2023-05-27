@@ -2,6 +2,8 @@
 *elm-graphql-metadata.json
 bundle.*.js
 bundle.js
+bundle.mjs
+bundle.ts
 elm-stuff
 node_modules
 reload.js
