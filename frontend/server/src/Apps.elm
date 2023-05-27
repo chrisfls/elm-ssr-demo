@@ -5,7 +5,7 @@ import Eff exposing (Eff)
 import Headers exposing (Headers)
 import IntDict exposing (IntDict)
 import Json.Encode exposing (Value)
-import Server.Html as Html
+import Html.Convert as Html
 import Url exposing (Url)
 
 
