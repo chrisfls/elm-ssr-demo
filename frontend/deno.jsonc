@@ -3,7 +3,8 @@
     "std/": "https://deno.land/std@0.188.0/",
     "eta": "https://deno.land/x/eta@v2.1.0/mod.ts",
     "refresh/": "https://deno.land/x/refresh@1.0.0/",
-    "xhr-shim": "https://esm.sh/xhr-shim@0.1.3"
+    "xelm": "https://raw.githubusercontent.com/kress95/extended-elm/16553c4e6474ab0dd3bb47e540c29ec466192661/xelm.ts",
+    "xhr": "https://deno.land/x/xhr@0.1.0/mod.ts"
   },
   "tasks": {
     "fmt": "elm-format .",

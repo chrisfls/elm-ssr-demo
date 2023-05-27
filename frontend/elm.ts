@@ -1,6 +1,7 @@
 /// <reference lib="dom" />
 
-import XMLHttpRequest from "xhr-shim";
+import * as path from "std/path/mod.ts";
+import "xhr";
 
 export interface Send<Message> {
   send(message: Message): void;
@@ -37,7 +38,9 @@ export interface Ports {
   cancelPort: Send<CancelPort>;
   htmlPort: Subscription<HtmlPort>;
   loggerPort: Subscription<LoggerPort>;
-  sendPort: Subscription<{ message: unknown, callback: (message: unknown) => unknown}>;
+  sendPort: Subscription<
+    { message: unknown; callback: (message: unknown) => unknown }
+  >;
 }
 
 export interface App {
@@ -57,11 +60,8 @@ export interface Elm {
 }
 
 export async function load(filePath: string): Promise<Elm> {
-  if (globalThis["XMLHttpRequest"] == null) {
-    globalThis["XMLHttpRequest"] = XMLHttpRequest;
-  }
-
-  await import(filePath);
-
-  return (globalThis as unknown as { Elm: Elm })["Elm"];
+  const { Elm } = await import(
+    filePath.slice(0, filePath.length - path.extname(filePath).length) + ".ts"
+  ) as typeof import("./bundle.ts");
+  return Elm as unknown as Elm;
 }

@@ -3,8 +3,7 @@ import { Handler, serve } from "std/http/server.ts";
 import * as path from "std/path/mod.ts";
 
 import * as eta from "eta";
-
-import * as elm from "./elm.ts";
+import { HtmlPort, HttpPort, load, LoggerPort } from "./elm.ts";
 
 export interface Options {
   /** Path for public assets. */
@@ -21,6 +20,9 @@ export interface Options {
 
   /** Extra script to inject, can be used to implement live-reload. */
   extra?: string;
+
+  /** Signal to abort server. */
+  signal?: AbortSignal;
 }
 
 async function find(
@@ -75,8 +77,8 @@ class Defer<T> {
   }
 }
 
-function encode(requestHeaders: Headers): elm.HttpPort["headers"] {
-  const headers: elm.HttpPort["headers"] = {};
+function encode(requestHeaders: Headers): HttpPort["headers"] {
+  const headers: HttpPort["headers"] = {};
 
   requestHeaders.forEach((value, key) => {
     const array = headers[key];
@@ -92,37 +94,39 @@ function encode(requestHeaders: Headers): elm.HttpPort["headers"] {
 
 export async function createHandler(options?: Options): Promise<Handler> {
   const publicDir = options?.publicDir ?? "public";
-  const server = options?.server ?? "bundle.js";
+  const server = options?.server ?? "./bundle.ts";
   const client = options?.client ?? await find(publicDir);
   const timeout = options?.timeout ?? 10000;
   const extra = options?.extra;
+  const Elm = await load(server);
+  const app = Elm.Server.Main.init({ flags: {} });
+  const signal = options?.signal;
 
-  if (client === undefined) {
-    throw new Error("Unable to find the client build");
+  function htmlPort(msg: HtmlPort) {
+    defer.resolve(msg.id, msg);
   }
 
-  const config = eta.configure({ views: Deno.cwd() });
-  const defer = new Defer<elm.HtmlPort>();
+  function loggerPort({ level, message }: LoggerPort) {
+    console[level](message);
+  }
 
-  let app: elm.App | undefined;
+  app.ports.htmlPort.subscribe(htmlPort);
+  app.ports.loggerPort.subscribe(loggerPort);
+
+  signal?.addEventListener("abort", () => {
+    app.ports.htmlPort.unsubscribe(htmlPort);
+    app.ports.loggerPort.unsubscribe(loggerPort);
+  });
+
+  const config = eta.configure({ views: Deno.cwd() });
+  const defer = new Defer<HtmlPort>();
 
   const link = {
     tailwind:
       "https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css",
   };
 
-  return async function handler(request) {
-    if (app === undefined) {
-      app = (await elm.load(server)).Server.Main.init({ flags: {} });
-      app.ports.htmlPort.subscribe((msg) => defer.resolve(msg.id, msg));
-      app.ports.loggerPort.subscribe(
-        ({ level, message }) => console[level](message),
-      );
-      app.ports.sendPort.subscribe(
-        ({ message, callback }) => console.log("unsafe:", message, callback, typeof callback),
-      );
-    }
-
+  return async function handler(request: Request) {
     const { id, promise } = defer.get();
 
     const timer = setTimeout(() => {

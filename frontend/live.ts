@@ -3,17 +3,16 @@ import { serveDir, serveFile } from "std/http/file_server.ts";
 import * as fs from "std/fs/mod.ts";
 
 import { refresh } from "refresh/mod.ts";
+import { xelm } from "../../expanded-elm/xelm.ts";
 
 import { createHandler } from "./server.ts";
-import { load } from "./elm.ts";
-import { make, replacements } from "./make.ts";
+import { replacements } from "./make.ts";
 
 const publicDir = "public";
 const reload = "reload.js";
 
-const tmp = async () => `${await Deno.makeTempFile()}.js`;
-const client = await tmp();
-const server = await tmp();
+const client = `${await Deno.makeTempFile()}.js`;
+const server = `${await Deno.makeTempFile()}.mjs`;
 
 const refresher = refresh({
   paths: [
@@ -21,13 +20,6 @@ const refresher = refresh({
     "./server/src",
     "./public",
   ],
-});
-
-const ssr = await createHandler({
-  publicDir,
-  server,
-  client: "bundle.js",
-  extra: reload,
 });
 
 if (!await fs.exists(reload)) {
@@ -64,26 +56,33 @@ async function handler(
   }
 
   if (url.pathname === "/bundle.js") {
-    await make("src/Main.elm", client, {
-      debug: true,
-    });
+    //   await xelm(["src/Main.elm"], client, {
+    //     debug: true,
+    //   });
 
     return serveFile(request, client);
   }
 
-  await make("src/Server/Main.elm", server, {
-    cwd: "./server",
+  await xelm(["src/Server/Main.elm"], server, {
+    projectRoot: "./server",
     debug: true,
-    deno: true,
-    replace: [
-      replacements.serverHtmlToJson,
-      replacements.serverMessageToJson,
-    ],
+    typescript: "deno",
+    transformations: [replacements.serverHtmlToJson],
   });
 
-  await load(server);
+  const abort = new AbortController();
 
-  return await ssr(request, connInfo);
+  const htmlResponse = await (await createHandler({
+    publicDir,
+    server,
+    client: "bundle.js",
+    extra: reload,
+    signal: abort.signal,
+  }))(request, connInfo);
+
+  abort.abort();
+
+  return htmlResponse;
 }
 
 await serve(handler);
