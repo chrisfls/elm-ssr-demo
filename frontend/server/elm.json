@@ -16,7 +16,7 @@
       "elm/url": "1.0.0",
       "elm/virtual-dom": "1.0.3",
       "elm-community/intdict": "3.0.0",
-      "kress95/elm-html-convert": "1.0.0"
+      "chrisfls/elm-html-convert": "1.0.0"
     },
     "indirect": {
       "elm/bytes": "1.0.8",
